@@ -1,26 +1,931 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg1: #170716;
+  --bg2: #39122b;
+  --bg3: #6b2048;
+  --card: rgba(18, 18, 22, 0.88);
+  --card2: rgba(32, 28, 35, 0.92);
+  --text: #fff7fb;
+  --muted: #c8a9bd;
+  --pink: #ff4db8;
+  --pink2: #ff7acb;
+  --blue: #1fb6ff;
+  --purple: #7c3aed;
+  --border: rgba(255, 77, 184, 0.36);
+  --shadow: 0 22px 65px rgba(255, 77, 184, 0.22);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  min-height: 100%;
+  background: var(--bg1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 77, 184, 0.26), transparent 32%),
+    radial-gradient(circle at top right, rgba(124, 58, 237, 0.22), transparent 30%),
+    radial-gradient(circle at bottom, rgba(255, 122, 203, 0.18), transparent 38%),
+    linear-gradient(180deg, var(--bg1), var(--bg2) 46%, var(--bg3));
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  transition: 0.18s ease;
+}
+
+button:active,
+a:active {
+  transform: scale(0.97);
+}
+
+input,
+textarea,
+select {
+  background: rgba(28, 28, 31, 0.92) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 77, 184, 0.45) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 14px 34px rgba(0,0,0,0.22);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #b9a3b1 !important;
+}
+
+/* Auto convert class lama */
+.bg-black,
+.bg-zinc-950,
+.bg-zinc-900,
+.bg-zinc-800 {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: white !important;
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.border-zinc-900,
+.border-zinc-800,
+.border-zinc-700 {
+  border-color: var(--border) !important;
+}
+
+.text-white,
+.text-zinc-100,
+.text-zinc-200,
+.text-zinc-300 {
+  color: white !important;
+}
+
+.text-zinc-400,
+.text-zinc-500,
+.text-zinc-600,
+.text-slate-400,
+.text-slate-500,
+.text-slate-600 {
+  color: var(--muted) !important;
+}
+
+.text-slate-900,
+.text-slate-800,
+.text-slate-700 {
+  color: white !important;
+}
+
+.bg-white,
+.bg-white\/90,
+.bg-white\/80,
+.bg-white\/75 {
+  background: var(--card) !important;
+  color: white !important;
+  border-color: var(--border) !important;
+}
+
+.bg-white.text-black,
+button.bg-white,
+a.bg-white {
+  background: linear-gradient(135deg, var(--pink), var(--purple)) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.bg-sky-500,
+.bg-blue-600 {
+  background: linear-gradient(135deg, var(--blue), #2563eb) !important;
+  color: white !important;
+}
+
+.bg-red-500,
+.bg-red-600 {
+  background: linear-gradient(135deg, #fb7185, #e11d48) !important;
+  color: white !important;
+}
+
+.bg-yellow-400,
+.bg-yellow-500 {
+  background: linear-gradient(135deg, #fde68a, #f59e0b) !important;
+  color: #190b12 !important;
+}
+
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl,
+.rounded-\[28px\] {
+  box-shadow: 0 14px 34px rgba(0,0,0,0.22);
+}
+
+.fixed.inset-0 {
+  background: rgba(0, 0, 0, 0.72) !important;
+  backdrop-filter: blur(16px);
+}
+
+/* Premium components */
+.jasky-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+}
+
+.jasky-mini-card {
+  background: var(--card2);
+  border: 1px solid rgba(255, 77, 184, 0.24);
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.24);
+}
+
+.jasky-button {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: white;
+  border-radius: 18px;
+  font-weight: 900;
+  box-shadow: 0 14px 34px rgba(255, 77, 184, 0.28);
+}
+
+.jasky-title {
+  background: linear-gradient(135deg, #ff4db8, #8b5cf6, #38bdf8);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.jasky-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 77, 184, 0.16);
+  color: #ff9bd5;
+  border: 1px solid rgba(255, 77, 184, 0.34);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.jasky-pill {
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff7acb, #ff4db8);
+  color: white;
+  box-shadow: 0 10px 28px rgba(255, 77, 184, 0.26);
+}
+
+.jasky-pill-active {
+  background: linear-gradient(135deg, #20c7ff, #1588ff);
+}
+
+@keyframes jaskyFade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main,
+section,
+.jasky-card {
+  animation: jaskyFade 0.38s ease both;
+}
+
+.jasky-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.jasky-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.09),
+    transparent 38%,
+    rgba(255,77,184,0.05)
+  );
+}
+
+.jasky-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+video {
+  background: #030305;
+}
+
+select option {
+  background: #111018;
+  color: white;
+}
+
+.jasky-button:hover,
+button:hover,
+a:hover {
+  filter: brightness(1.08);
+}
+
+.jasky-card video {
+  border-radius: 24px;
+}
+
+.jasky-action-button {
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255, 77, 184, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px rgba(0,0,0,0.28);
+}
+
+a[href="/profile"].fixed {
+  width: 3.6rem !important;
+  height: 3.6rem !important;
+  right: 1.1rem !important;
+  bottom: 1.15rem !important;
+  font-size: 1.45rem !important;
+  box-shadow: 0 14px 34px rgba(34, 197, 94, 0.25) !important;
+}
+
+a[href="/history"].fixed {
+  width: 3rem !important;
+  height: 3rem !important;
+  right: 1.4rem !important;
+  bottom: 5.25rem !important;
+  font-size: 1.15rem !important;
+  box-shadow: 0 14px 34px rgba(217, 70, 239, 0.24) !important;
+}
+
+a[href="/profile"].fixed img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+video {
+  background: #030305;
+}
+
+select option {
+  background: #111018;
+  color: white;
+}
+
+.jasky-card video {
+  border-radius: 24px;
+}
+
+/* === JAKSKY FINAL POLISH === */
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: white;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 61, 184, 0.22), transparent 34%),
+    radial-gradient(circle at 90% 10%, rgba(90, 90, 255, 0.20), transparent 32%),
+    linear-gradient(180deg, #190818 0%, #8a1f59 52%, #9d255f 100%) !important;
+}
+
+input,
+textarea,
+select {
+  color: white !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,77,184,0.34) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255,220,242,0.45) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(255,140,215,0.75) !important;
+  box-shadow: 0 0 0 4px rgba(255,77,184,0.10) !important;
+}
+
+input[type="file"] {
+  width: 100%;
+  border-radius: 18px !important;
+  padding: 10px !important;
+  font-weight: 800 !important;
+}
+
+input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 14px;
+  margin-right: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  color: white;
+  background: linear-gradient(135deg, #ff3db8, #7c3cff);
+}
+
+.jasky-card {
+  border-radius: 32px !important;
+  border: 1px solid rgba(255,77,184,0.28) !important;
+  background:
+    linear-gradient(145deg, rgba(24,18,28,0.94), rgba(7,7,12,0.94)) !important;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 50px rgba(255,77,184,0.11) !important;
+}
+
+.jasky-mini-card {
+  border-radius: 22px !important;
+  border: 1px solid rgba(255,77,184,0.24) !important;
+  background: rgba(255,255,255,0.055) !important;
+}
+
+.jasky-button {
+  border-radius: 22px !important;
+  background: linear-gradient(135deg, #ff3db8 0%, #8a35ff 100%) !important;
+  color: white !important;
+  font-weight: 900 !important;
+  box-shadow: 0 18px 45px rgba(255,61,184,0.25) !important;
+}
+
+.jasky-badge {
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,77,184,0.34) !important;
+  background: rgba(255,77,184,0.15) !important;
+  color: #ffd4ef !important;
+  font-weight: 900 !important;
+}
+
+.jasky-pill {
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ff5cc8, #ff42b5) !important;
+  color: white !important;
+  font-weight: 900 !important;
+  box-shadow: 0 12px 25px rgba(255,61,184,0.18) !important;
+}
+
+.jasky-pill-active {
+  background: linear-gradient(135deg, #22c7ff, #1677ff) !important;
+  box-shadow: 0 14px 30px rgba(34,199,255,0.22) !important;
+}
+
+video {
+  background: #030305 !important;
+}
+
+select option {
+  background: #111018 !important;
+  color: white !important;
+}
+
+/* Floating buttons jangan terlalu gede */
+a[href="/profile"].fixed {
+  width: 3.4rem !important;
+  height: 3.4rem !important;
+  right: 1.05rem !important;
+  bottom: 1.1rem !important;
+  font-size: 1.35rem !important;
+}
+
+a[href="/history"].fixed {
+  width: 2.9rem !important;
+  height: 2.9rem !important;
+  right: 1.25rem !important;
+  bottom: 5.05rem !important;
+  font-size: 1rem !important;
+}
+
+a[href="/profile"].fixed img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Mobile spacing */
+@media (max-width: 640px) {
+  .jasky-title {
+    letter-spacing: -0.04em;
+  }
+
+  main {
+    overflow-x: hidden;
+  }
+}
+
+/* === JAKSKY PROFILE BACKGROUND === */
+
+@keyframes jaskyGlowMove {
+  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  50% { background-position: 100% 50%; filter: hue-rotate(18deg); }
+  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+}
+
+.jasky-profile-bg-aurora {
+  background: linear-gradient(135deg, #ff2fb3, #7c3cff, #008cff, #ff2fb3);
+  background-size: 300% 300%;
+  animation: jaskyGlowMove 5s ease infinite;
+}
+
+.jasky-profile-bg-neon {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 61, 184, 0.9), transparent 28%),
+    radial-gradient(circle at 80% 30%, rgba(0, 140, 255, 0.9), transparent 30%),
+    linear-gradient(135deg, #130016, #090015);
+  background-size: 240% 240%;
+  animation: jaskyGlowMove 4s ease infinite;
+}
+
+.jasky-profile-bg-galaxy {
+  background:
+    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.9), transparent 2%),
+    radial-gradient(circle at 75% 35%, rgba(255,255,255,0.8), transparent 2%),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,0.7), transparent 2%),
+    linear-gradient(135deg, #10002b, #3a0ca3, #000814);
+  background-size: 180% 180%;
+  animation: jaskyGlowMove 7s ease infinite;
+}
+
+.jasky-profile-bg-fire {
+  background: linear-gradient(135deg, #ff006e, #fb5607, #ffbe0b, #8338ec);
+  background-size: 300% 300%;
+  animation: jaskyGlowMove 4.5s ease infinite;
+}
+
+.jasky-profile-bg-ice {
+  background: linear-gradient(135deg, #00d4ff, #3a86ff, #8338ec, #00f5d4);
+  background-size: 300% 300%;
+  animation: jaskyGlowMove 5s ease infinite;
+}
+
+/* === JAKSKY PROFILE BACKGROUND + NEON RING === */
+
+@keyframes jaskyTwinkle {
+  0%, 100% {
+    opacity: .65;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+}
+
+@keyframes jaskyMoveGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes jaskySpinRing {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.jasky-profile-bg {
+  position: relative;
+  overflow: hidden;
+  background-size: 220% 220% !important;
+  animation: jaskyMoveGlow 8s ease infinite;
+}
+
+.jasky-profile-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .75;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 35%, rgba(255,77,184,.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 42% 72%, rgba(96,165,250,.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 78%, rgba(255,255,255,.55) 0 1px, transparent 2px);
+  animation: jaskyTwinkle 1.8s ease-in-out infinite;
+}
+
+.jasky-bg-purpleLightning {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,77,184,.55), transparent 28%),
+    radial-gradient(circle at 85% 30%, rgba(124,58,237,.65), transparent 30%),
+    linear-gradient(135deg, #140018, #30045f, #050014) !important;
+}
+
+.jasky-bg-pinkGlitter {
+  background:
+    radial-gradient(circle at 25% 30%, rgba(255,255,255,.55), transparent 1.5px),
+    radial-gradient(circle at 65% 40%, rgba(255,77,184,.7), transparent 2px),
+    linear-gradient(135deg, #210013, #8f145e, #180014) !important;
+}
+
+.jasky-bg-cyberGrid {
+  background:
+    linear-gradient(rgba(34,211,238,.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,.22) 1px, transparent 1px),
+    radial-gradient(circle at 50% 30%, rgba(34,211,238,.5), transparent 35%),
+    linear-gradient(135deg, #020617, #07143d, #020617) !important;
+  background-size: 28px 28px, 28px 28px, 220% 220%, 220% 220% !important;
+}
+
+.jasky-bg-neonWave {
+  background:
+    radial-gradient(circle at 25% 35%, rgba(255,77,184,.45), transparent 30%),
+    radial-gradient(circle at 80% 65%, rgba(59,130,246,.55), transparent 34%),
+    linear-gradient(135deg, #12001c, #3b0764, #020617) !important;
+}
+
+.jasky-bg-starlight {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.85), transparent 1.5px),
+    radial-gradient(circle at 55% 35%, rgba(255,77,184,.8), transparent 1.8px),
+    radial-gradient(circle at 78% 70%, rgba(147,197,253,.8), transparent 1.7px),
+    linear-gradient(135deg, #020617, #16002b, #030712) !important;
+}
+
+.jasky-avatar-ring {
+  position: relative;
+  isolation: isolate;
+  box-shadow:
+    0 0 18px rgba(255,77,184,.35),
+    0 0 28px rgba(99,102,241,.22);
+}
+
+.jasky-avatar-ring::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    #ff3db8,
+    #7c3cff,
+    #22d3ee,
+    #ff3db8
+  );
+  animation: jaskySpinRing 3.2s linear infinite;
+}
+
+.jasky-avatar-ring::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: -2;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(255,77,184,.9) 0 1px, transparent 2px);
+  background-size: 18px 18px, 26px 26px;
+  opacity: .45;
+  animation: jaskyTwinkle 1.4s ease-in-out infinite;
+}
+
+.jasky-comment-card {
+  border: 1px solid rgba(255,77,184,.28) !important;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.035)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 18px 42px rgba(0,0,0,.28) !important;
+}
+
+/* === JAKSKY AVATAR FRAME / ML STYLE BORDER === */
+
+@keyframes jaskyFrameSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes jaskyFramePulse {
+  0%, 100% {
+    filter: brightness(1);
+    opacity: .82;
+  }
+  50% {
+    filter: brightness(1.5);
+    opacity: 1;
+  }
+}
+
+.jasky-avatar-frame {
+  position: relative;
+  isolation: isolate;
+  overflow: visible !important;
+}
+
+.jasky-avatar-frame > img {
+  position: relative;
+  z-index: 3;
+  border-radius: inherit;
+}
+
+.jasky-avatar-frame::before,
+.jasky-avatar-frame::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.jasky-avatar-frame::before {
+  inset: -7px;
+  z-index: 1;
+  animation: jaskyFrameSpin 4.5s linear infinite;
+}
+
+.jasky-avatar-frame::after {
+  inset: -14px;
+  z-index: 0;
+  filter: blur(12px);
+  opacity: .72;
+  animation: jaskyFramePulse 1.7s ease-in-out infinite;
+}
+
+.jasky-frame-neon::before {
+  background: conic-gradient(#ff3db8, #7c3cff, #22d3ee, #ff3db8);
+}
+
+.jasky-frame-neon::after {
+  background: conic-gradient(#ff3db8, #7c3cff, #22d3ee, #ff3db8);
+}
+
+.jasky-frame-epic::before {
+  background: conic-gradient(#f0abfc, #a855f7, #4f46e5, #f0abfc);
+  box-shadow: 0 0 24px rgba(168,85,247,.55);
+}
+
+.jasky-frame-epic::after {
+  background: radial-gradient(circle, rgba(168,85,247,.75), transparent 65%);
+}
+
+.jasky-frame-mythic::before {
+  background: conic-gradient(#fff7ad, #f59e0b, #f97316, #fff7ad);
+  box-shadow:
+    0 0 24px rgba(245,158,11,.6),
+    0 0 42px rgba(251,191,36,.28);
+}
+
+.jasky-frame-mythic::after {
+  background: radial-gradient(circle, rgba(251,191,36,.85), transparent 68%);
+}
+
+.jasky-frame-fire::before {
+  background: conic-gradient(#ff004c, #ff7a00, #ffee00, #ff004c);
+  box-shadow:
+    0 0 24px rgba(255,0,76,.5),
+    0 0 38px rgba(255,122,0,.35);
+}
+
+.jasky-frame-fire::after {
+  background: radial-gradient(circle, rgba(255,77,0,.82), transparent 66%);
+}
+
+.jasky-frame-ocean::before {
+  background: conic-gradient(#38bdf8, #2563eb, #06b6d4, #38bdf8);
+  box-shadow:
+    0 0 24px rgba(56,189,248,.55),
+    0 0 38px rgba(37,99,235,.35);
+}
+
+.jasky-frame-ocean::after {
+  background: radial-gradient(circle, rgba(56,189,248,.78), transparent 66%);
+}
+
+.jasky-frame-toxic::before {
+  background: conic-gradient(#bef264, #22c55e, #14b8a6, #bef264);
+  box-shadow:
+    0 0 24px rgba(34,197,94,.55),
+    0 0 38px rgba(190,242,100,.25);
+}
+
+.jasky-frame-toxic::after {
+  background: radial-gradient(circle, rgba(34,197,94,.75), transparent 66%);
+}
+
+.jasky-frame-royal::before {
+  background: conic-gradient(#fdf2f8, #ec4899, #8b5cf6, #fdf2f8);
+  clip-path: polygon(
+    50% 0%,
+    61% 18%,
+    82% 12%,
+    78% 34%,
+    100% 50%,
+    78% 66%,
+    82% 88%,
+    61% 82%,
+    50% 100%,
+    39% 82%,
+    18% 88%,
+    22% 66%,
+    0% 50%,
+    22% 34%,
+    18% 12%,
+    39% 18%
+  );
+  box-shadow: 0 0 28px rgba(236,72,153,.58);
+}
+
+.jasky-frame-royal::after {
+  background: radial-gradient(circle, rgba(236,72,153,.8), transparent 66%);
+}
+
+/* === JAKSKY FRAME NONE FIX === */
+.jasky-frame-none::before,
+.jasky-frame-none::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.jasky-avatar-plain {
+  box-shadow: none !important;
+}
+
+.jasky-avatar-plain::before,
+.jasky-avatar-plain::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Like / unlike selected state */
+.jasky-action-selected {
+  transform: translateY(-1px);
+  position: relative;
+  overflow: hidden;
+}
+
+.jasky-action-selected::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent);
+  transform: translateX(-60%);
+  animation: jasky-shine 2.2s infinite;
+}
+
+@keyframes jasky-shine {
+  0% { transform: translateX(-70%) rotate(12deg); }
+  100% { transform: translateX(70%) rotate(12deg); }
+}
+
+/* === JakSky Final Publish Polish === */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(236, 72, 153, 0.55);
+  color: white;
+}
+
+button, a, input, textarea, select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active, a:active {
+  transform: scale(0.98);
+}
+
+input, textarea, select {
+  color-scheme: dark;
+}
+
+input[type="file"] {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  background: rgba(0, 0, 0, 0.24);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 14px;
+}
+
+input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-right: 12px;
+  font-weight: 900;
+  color: white;
+  background: linear-gradient(135deg, #ec4899, #7c3aed, #2563eb);
+}
+
+video {
+  background: #050007;
+}
+
+.jasky-soft-glow {
+  box-shadow:
+    0 0 0 1px rgba(236, 72, 153, 0.22),
+    0 22px 80px rgba(0, 0, 0, 0.45),
+    0 0 45px rgba(168, 85, 247, 0.18);
+}
+
+.jasky-premium-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.jasky-premium-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(236,72,153,.65), rgba(124,58,237,.45), rgba(37,99,235,.55));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+@keyframes jasky-float-final {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.jasky-float-final {
+  animation: jasky-float-final 4s ease-in-out infinite;
+}
+
+@media (max-width: 480px) {
+  .jasky-mobile-safe {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }

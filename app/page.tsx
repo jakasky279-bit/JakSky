@@ -1,65 +1,136 @@
-import Image from "next/image";
+import Link from "next/link";
+import JakSkyNavbar from "@/components/JakSkyNavbar";
+
+const features = [
+  {
+    icon: "🎬",
+    title: "Konten Gratis & VIP",
+    desc: "Nikmati konten publik dan konten premium khusus member VIP dalam satu platform.",
+  },
+  {
+    icon: "⚡",
+    title: "Realtime Online",
+    desc: "Update konten, komentar, dan pesan dibuat agar terasa cepat dan responsif.",
+  },
+  {
+    icon: "🛡️",
+    title: "Moderasi Komunitas",
+    desc: "Moderator dapat memantau, membalas, menyembunyikan, atau menghapus komentar.",
+  },
+  {
+    icon: "👑",
+    title: "Owner Control",
+    desc: "Owner mengatur akun, role, title, VIP, admin, moderator, dan akses platform.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="min-h-screen pb-8 pt-3">
+      <JakSkyNavbar />
+
+      <section className="mx-auto max-w-6xl px-4 pt-6">
+        <div className="jasky-card p-5 md:p-10">
+          <div className="text-center">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[30px] bg-gradient-to-br from-pink-500 via-purple-600 to-blue-500 text-5xl shadow-2xl shadow-pink-500/30">
+              ⚡
+            </div>
+
+            <h1 className="jasky-title mt-5 text-5xl font-black tracking-tight md:text-7xl">
+              JakSky
+            </h1>
+
+            <p className="mt-3 text-sm font-black uppercase tracking-[0.22em] text-pink-100 md:text-base">
+              Premium Video Gate • VIP Access • Fast Update
+            </p>
+
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-pink-100/70 md:text-lg">
+              Platform media premium untuk menikmati konten gratis dan VIP
+              dengan tampilan modern, komunitas aktif, dan sistem kontrol yang
+              lengkap.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="jasky-mini-card p-4 text-center">
+              <p className="text-2xl font-black md:text-3xl">30</p>
+              <p className="mt-1 text-[11px] font-bold text-pink-100/60">
+                Video/upload
+              </p>
+            </div>
+
+            <div className="jasky-mini-card p-4 text-center">
+              <p className="text-2xl font-black md:text-3xl">2GB</p>
+              <p className="mt-1 text-[11px] font-bold text-pink-100/60">
+                Per video
+              </p>
+            </div>
+
+            <div className="jasky-mini-card p-4 text-center">
+              <p className="text-2xl font-black md:text-3xl">VIP</p>
+              <p className="mt-1 text-[11px] font-bold text-pink-100/60">
+                Premium
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Link href="/register" className="jasky-button px-5 py-4 text-center">
+              Daftar
+            </Link>
+
+            <Link
+              href="/login/user"
+              className="rounded-[18px] border border-pink-400/30 bg-white/10 px-5 py-4 text-center font-black text-white"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              Masuk Akun
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-5 jasky-card p-4 md:p-5">
+          <div className="aspect-video overflow-hidden rounded-[28px] border border-pink-400/20 bg-gradient-to-br from-sky-100 via-white to-blue-100 p-4">
+            <div className="flex h-full items-center justify-center rounded-[24px] bg-white/40">
+              <div className="text-center">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-gradient-to-br from-sky-400 to-blue-700 text-4xl font-black text-white shadow-2xl">
+                  ▶
+                </div>
+
+                <p className="mt-5 text-2xl font-black text-slate-950">JakSky Player</p>
+
+                <p className="mt-2 px-5 text-sm font-black text-slate-700 drop-shadow-none">Tonton konten gratis dan VIP dengan player yang ringan dan nyaman.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-4">
+          {features.map((item) => (
+            <div key={item.title} className="jasky-card p-5">
+              <p className="text-3xl">{item.icon}</p>
+              <h2 className="mt-4 text-lg font-black text-white">
+                {item.title}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-pink-100/65">
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <footer className="jasky-card mt-6 p-5 text-center">
+          <p className="text-sm text-pink-100/60">
+            © 2026 JakSky. Platform media premium untuk komunitas digital.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+          <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm font-black text-pink-100/80">
+            <Link href="/about">Tentang</Link>
+            <Link href="/help">Bantuan</Link>
+            <Link href="/privacy">Privasi</Link>
+            <Link href="/terms">Ketentuan</Link>
+          </div>
+        </footer>
+      </section>
+    </main>
   );
 }
