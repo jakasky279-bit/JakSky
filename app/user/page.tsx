@@ -203,9 +203,8 @@ export default function UserPage() {
     } catch {}
   }
 
-  function actorKey() {
-    return String(user?.id || user?.username || user?.email || "guest");
-  }
+  
+
 
 
   function getReactionActorKey() {
@@ -679,9 +678,8 @@ export default function UserPage() {
 
 
 
-  function actorKey() {
-    return String(user?.id || user?.username || "guest");
-  }
+  
+
 
   function getMyReaction(item?: Content | null) {
     if (!item?.id) return "";
@@ -960,6 +958,11 @@ export default function UserPage() {
     return data;
   }, [contents, favorites, filter, search]);
 
+
+  
+  function actorKey() {
+    return String(user?.id || user?.username || user?.email || "guest");
+  }
 
   function getActiveReaction(item?: Content | null) {
     if (!item?.id) return "";
