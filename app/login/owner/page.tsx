@@ -15,6 +15,8 @@ type Account = {
   ownerKey?: string;
   title?: string;
   isVip?: boolean;
+  avatar?: string;
+  bio?: string;
 };
 
 function getJSON<T>(key: string, fallback: T): T {
@@ -26,7 +28,14 @@ function getJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function safeText(value: string) {
+function saveOwnerSession(owner: Account) {
+  localStorage.setItem("jasky_staff_session", JSON.stringify(owner));
+  localStorage.setItem("jasky_current_user", JSON.stringify(owner));
+  localStorage.setItem("jasky_login_user_id", owner.id || "owner-main");
+  window.dispatchEvent(new Event("jasky-sync"));
+}
+
+function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
@@ -38,37 +47,70 @@ export default function OwnerLoginPage() {
   const [ownerKey, setOwnerKey] = useState("");
   const [error, setError] = useState("");
 
+  function createDefaultOwner(): Account {
+    return {
+      id: "owner-main",
+      username: "owner",
+      email: "owner@jasky.local",
+      password: "jasky123",
+      role: "owner",
+      status: "active",
+      accessKey: "JAKSKY-OWNER",
+      ownerKey: "JAKSKY-OWNER",
+      title: "Owner JakSky",
+      isVip: true,
+      avatar: "",
+      bio: "",
+    };
+  }
+
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
+    const inputLogin = normalize(login);
+    const inputPassword = password.trim();
+    const inputKey = ownerKey.trim();
+
     const accounts = getJSON<Account[]>("jasky_accounts", []);
+    const defaultOwner = createDefaultOwner();
 
     const found = accounts.find((acc) => {
-      const isOwner = String(acc.role || "").toLowerCase() === "owner";
-      const isActive = String(acc.status || "active").toLowerCase() !== "disabled";
+      const role = normalize(String(acc.role || ""));
+      const status = normalize(String(acc.status || "active"));
 
       const sameLogin =
-        safeText(acc.username || "") === safeText(login) ||
-        safeText(acc.email || "") === safeText(login);
+        normalize(String(acc.username || "")) === inputLogin ||
+        normalize(String(acc.email || "")) === inputLogin;
 
-      const samePassword = String(acc.password || "") === password;
-      const sameKey =
-        String(acc.accessKey || acc.ownerKey || "") === ownerKey;
+      const samePassword = String(acc.password || "") === inputPassword;
+      const sameKey = String(acc.accessKey || acc.ownerKey || "") === inputKey;
 
-      return isOwner && isActive && sameLogin && samePassword && sameKey;
+      return role === "owner" && status !== "disabled" && sameLogin && samePassword && sameKey;
     });
 
-    if (!found) {
-      setError("Login owner gagal. Periksa username, password, dan owner key.");
+    if (found) {
+      saveOwnerSession(found);
+      router.push("/owner");
       return;
     }
 
-    localStorage.setItem("jasky_staff_session", JSON.stringify(found));
-    localStorage.setItem("jasky_current_user", JSON.stringify(found));
-    window.dispatchEvent(new Event("jasky-sync"));
+    const defaultLoginOk =
+      (inputLogin === "owner" || inputLogin === "owner@jasky.local") &&
+      inputPassword === "jasky123" &&
+      inputKey === "JAKSKY-OWNER";
 
-    router.push("/owner");
+    if (defaultLoginOk) {
+      const clean = accounts.filter((acc) => normalize(String(acc.role || "")) !== "owner");
+      const next = [defaultOwner, ...clean];
+
+      localStorage.setItem("jasky_accounts", JSON.stringify(next));
+      saveOwnerSession(defaultOwner);
+      router.push("/owner");
+      return;
+    }
+
+    setError("Login owner gagal. Periksa username, password, dan owner key.");
   }
 
   return (
