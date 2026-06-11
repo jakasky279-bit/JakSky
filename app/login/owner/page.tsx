@@ -5,7 +5,7 @@ export default function OwnerLoginPage() {
     <StaffLoginForm
       role="owner"
       title="Masuk Owner"
-      subtitle="Akses khusus pemilik platform JakSky."
+      subtitle="Akses khusus pemilik platform JakSky. Data login tidak ditampilkan untuk keamanan."
       redirectTo="/owner"
     />
   );
