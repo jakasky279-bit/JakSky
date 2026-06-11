@@ -1,5 +1,6 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -49,20 +50,10 @@ type ContentItem = {
 };
 
 const MAX_VIDEO_COUNT = 30;
+const MAX_VIDEO_SIZE = 2 * 1024 * 1024 * 1024;
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error(`Gagal membaca file ${file.name}`));
-
-    reader.readAsDataURL(file);
-  });
 }
 
 function getContents(): ContentItem[] {
@@ -125,16 +116,19 @@ export default function AdminUploadStudio() {
       file.type.startsWith("video/")
     );
 
-    if (selected.length < 1) {
-      setVideoFiles([]);
+    if (selected.length > MAX_VIDEO_COUNT) {
+      alert("Maksimal 30 video sekali upload. Yang dipakai hanya 30 pertama.");
+    }
+
+    const clean = selected.slice(0, MAX_VIDEO_COUNT);
+
+    const tooBig = clean.find((file) => file.size > MAX_VIDEO_SIZE);
+    if (tooBig) {
+      alert(`${tooBig.name} lebih dari 2GB.`);
       return;
     }
 
-    if (selected.length > MAX_VIDEO_COUNT) {
-      alert(`Maksimal ${MAX_VIDEO_COUNT} video sekali upload. Yang dipakai hanya 30 pertama.`);
-    }
-
-    setVideoFiles(selected.slice(0, MAX_VIDEO_COUNT));
+    setVideoFiles(clean);
   }
 
   async function uploadContent(e: React.FormEvent<HTMLFormElement>) {
@@ -150,34 +144,51 @@ export default function AdminUploadStudio() {
       return;
     }
 
-    if (videoFiles.length > MAX_VIDEO_COUNT) {
-      alert(`Maksimal ${MAX_VIDEO_COUNT} video.`);
-      return;
-    }
-
     setLoading(true);
-    setInfo(`Menyiapkan ${videoFiles.length} video...`);
+    setInfo(`Menyiapkan upload ${videoFiles.length} video...`);
 
     try {
-      const thumbnailDataUrl = thumbnailFile
-        ? await readFileAsDataUrl(thumbnailFile)
-        : "";
+      let thumbnailUrl = "";
+
+      if (thumbnailFile) {
+        setInfo("Mengupload thumbnail...");
+
+        const thumbBlob = await upload(
+          `thumbnails/${Date.now()}-${thumbnailFile.name}`,
+          thumbnailFile,
+          {
+            access: "public",
+            handleUploadUrl: "/api/blob/upload",
+          }
+        );
+
+        thumbnailUrl = thumbBlob.url;
+      }
 
       const uploadedVideos: UploadedVideo[] = [];
 
       for (let i = 0; i < videoFiles.length; i++) {
         const file = videoFiles[i];
-        setInfo(`Menyimpan video ${i + 1}/${videoFiles.length}: ${file.name}`);
 
-        const dataUrl = await readFileAsDataUrl(file);
+        setInfo(`Mengupload video ${i + 1}/${videoFiles.length}: ${file.name}`);
+
+        const videoBlob = await upload(
+          `videos/${Date.now()}-${i + 1}-${file.name}`,
+          file,
+          {
+            access: "public",
+            handleUploadUrl: "/api/blob/upload",
+            multipart: true,
+          }
+        );
 
         uploadedVideos.push({
           id: makeId("video"),
           title: file.name,
-          url: dataUrl,
-          mediaDataUrl: dataUrl,
-          videoUrl: dataUrl,
-          fileUrl: dataUrl,
+          url: videoBlob.url,
+          mediaDataUrl: videoBlob.url,
+          videoUrl: videoBlob.url,
+          fileUrl: videoBlob.url,
           filename: file.name,
           name: file.name,
           size: file.size,
@@ -202,14 +213,14 @@ export default function AdminUploadStudio() {
         commentsEnabled,
         createdAt: new Date().toISOString(),
 
-        thumbnailDataUrl,
-        thumbnailUrl: thumbnailDataUrl,
-        thumbnail_url: thumbnailDataUrl,
+        thumbnailDataUrl: thumbnailUrl,
+        thumbnailUrl,
+        thumbnail_url: thumbnailUrl,
 
-        mediaDataUrl: firstVideo?.mediaDataUrl || "",
-        mediaUrl: firstVideo?.mediaDataUrl || "",
-        videoUrl: firstVideo?.mediaDataUrl || "",
-        fileUrl: firstVideo?.mediaDataUrl || "",
+        mediaDataUrl: firstVideo?.videoUrl || "",
+        mediaUrl: firstVideo?.videoUrl || "",
+        videoUrl: firstVideo?.videoUrl || "",
+        fileUrl: firstVideo?.videoUrl || "",
         mediaName: firstVideo?.filename || "",
         filename: firstVideo?.filename || "",
 
@@ -240,7 +251,7 @@ export default function AdminUploadStudio() {
     } catch (error) {
       console.error(error);
       alert(
-        "Upload gagal. Kalau file video besar, browser tidak kuat menyimpan ke localStorage. Nanti untuk 2GB wajib pakai Vercel Blob."
+        "Upload gagal. Pastikan BLOB_READ_WRITE_TOKEN sudah dipasang di Vercel Environment Variables."
       );
     } finally {
       setLoading(false);
@@ -269,17 +280,11 @@ export default function AdminUploadStudio() {
     <main className="min-h-screen px-4 py-6 text-white">
       <div className="mx-auto max-w-5xl">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <Link
-            href="/user"
-            className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black"
-          >
+          <Link href="/user" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black">
             Lihat User
           </Link>
 
-          <Link
-            href="/"
-            className="rounded-2xl border border-pink-400/30 bg-pink-500/15 px-4 py-3 font-black text-pink-100"
-          >
+          <Link href="/" className="rounded-2xl border border-pink-400/30 bg-pink-500/15 px-4 py-3 font-black text-pink-100">
             Beranda
           </Link>
         </div>
@@ -294,7 +299,7 @@ export default function AdminUploadStudio() {
           </h1>
 
           <p className="mt-2 text-white/60">
-            Upload langsung dari browser. Bisa pilih 1–30 video sekaligus.
+            Upload ke Vercel Blob. Bisa pilih 1–30 video sekaligus.
           </p>
 
           <form onSubmit={uploadContent} className="mt-7 space-y-5">
@@ -339,7 +344,7 @@ export default function AdminUploadStudio() {
 
               <input
                 type="file"
-                accept="video/mp4,video/webm,video/quicktime,video/*"
+                accept="video/*"
                 multiple
                 onChange={(e) => pickVideos(e.target.files)}
                 className="mt-4 w-full rounded-2xl border border-white/10 bg-black/30 p-4"
@@ -352,10 +357,7 @@ export default function AdminUploadStudio() {
               {videoFiles.length > 0 && (
                 <div className="mt-4 max-h-56 space-y-2 overflow-y-auto pr-1">
                   {videoFiles.map((file, index) => (
-                    <div
-                      key={`${file.name}-${index}`}
-                      className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3"
-                    >
+                    <div key={`${file.name}-${index}`} className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3">
                       <p className="break-all font-bold">
                         {index + 1}. {file.name}
                       </p>
@@ -430,7 +432,7 @@ export default function AdminUploadStudio() {
               disabled={loading}
               className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-6 py-5 text-lg font-black text-white shadow-[0_18px_45px_rgba(236,72,153,.35)] disabled:opacity-50"
             >
-              {loading ? "Menyimpan..." : `↑ Upload Konten ${videoFiles.length ? `(${videoFiles.length} video)` : ""}`}
+              {loading ? "Mengupload..." : `↑ Upload Konten ${videoFiles.length ? `(${videoFiles.length} video)` : ""}`}
             </button>
           </form>
         </section>
@@ -460,21 +462,12 @@ export default function AdminUploadStudio() {
           ) : (
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {contents.map((item) => (
-                <article
-                  key={item.id}
-                  className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5"
-                >
+                <article key={item.id} className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5">
                   <div className="aspect-video bg-black/50">
                     {item.thumbnailDataUrl || item.thumbnailUrl ? (
-                      <img
-                        src={item.thumbnailDataUrl || item.thumbnailUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={item.thumbnailDataUrl || item.thumbnailUrl} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-5xl">
-                        🎬
-                      </div>
+                      <div className="flex h-full items-center justify-center text-5xl">🎬</div>
                     )}
                   </div>
 
@@ -484,11 +477,7 @@ export default function AdminUploadStudio() {
                       {(item.videos || item.content_videos || []).length || (hasVideo(item) ? 1 : 0)} video
                     </p>
 
-                    <button
-                      type="button"
-                      onClick={() => deleteContent(item.id)}
-                      className="mt-4 w-full rounded-2xl bg-red-500/20 px-4 py-3 font-black text-red-100"
-                    >
+                    <button type="button" onClick={() => deleteContent(item.id)} className="mt-4 w-full rounded-2xl bg-red-500/20 px-4 py-3 font-black text-red-100">
                       Hapus
                     </button>
                   </div>

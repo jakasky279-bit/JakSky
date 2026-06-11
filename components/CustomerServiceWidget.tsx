@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Account = {
   id?: string;
@@ -52,6 +53,9 @@ function safeTime(value?: string) {
 }
 
 export default function CustomerServiceWidget() {
+  const pathname = usePathname();
+
+  if (pathname !== "/") return null;
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [messages, setMessages] = useState<CsMessage[]>([]);
