@@ -251,7 +251,9 @@ export default function AdminUploadStudio() {
     } catch (error) {
       console.error(error);
       alert(
-        "Upload gagal. Pastikan BLOB_READ_WRITE_TOKEN sudah dipasang di Vercel Environment Variables."
+        error instanceof Error
+          ? "Upload gagal: " + error.message
+          : "Upload gagal. Cek token Blob di Vercel."
       );
     } finally {
       setLoading(false);
