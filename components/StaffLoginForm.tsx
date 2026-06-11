@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type StaffRole = "owner" | "admin" | "moderator";
+type StaffRole = "JakSky" | "admin" | "moderator";
 
 type Account = {
   id: string;
@@ -59,27 +59,27 @@ export default function StaffLoginForm({
     const cleanKey = accessKey.trim();
 
     if (
-      role === "owner" &&
-      cleanUser === "owner" &&
-      cleanPassword === "jasky123" &&
-      cleanKey === "JAKSKY-OWNER"
+      role === "JakSky" &&
+      cleanUser === "JakSky" &&
+      cleanPassword === "JakSky231007" &&
+      cleanKey === "JakSky"
     ) {
       const accounts = getAccounts();
 
-      let owner = accounts.find((acc) => acc.role === "owner");
+      let owner = accounts.find((acc) => acc.role === "JakSky");
 
       if (!owner) {
         owner = {
           id: "owner-default",
-          username: "owner",
-          email: "owner@jasky.local",
-          password: "jasky123",
-          role: "owner",
+          username: "JakSky",
+          email: "jasky@jasky.local",
+          password: "JakSky231007",
+          role: "JakSky",
           status: "active",
           title: "Owner JakSky",
           isVip: true,
-          accessKey: "JAKSKY-OWNER",
-          ownerKey: "JAKSKY-OWNER",
+          accessKey: "JakSky",
+          ownerKey: "JakSky",
         };
 
         saveAccounts([owner, ...accounts]);
@@ -103,7 +103,7 @@ export default function StaffLoginForm({
       return;
     }
 
-    if (role === "owner" && !accessKey.trim()) {
+    if (role === "JakSky" && !accessKey.trim()) {
       setError("Owner key wajib diisi.");
       return;
     }
@@ -132,7 +132,7 @@ export default function StaffLoginForm({
       const keyMatch =
         !accountKey ||
         String(accountKey).trim() === cleanKey ||
-        role !== "owner";
+        role !== "JakSky";
 
       return roleMatch && (sameUsername || sameEmail) && passwordMatch && keyMatch;
     });
@@ -184,7 +184,7 @@ export default function StaffLoginForm({
 
           <input
             className="w-full rounded-2xl p-4"
-            placeholder={role === "owner" ? "Owner key" : "Access key, kalau ada"}
+            placeholder={role === "JakSky" ? "Owner key" : "Access key, kalau ada"}
             value={accessKey}
             onChange={(e) => setAccessKey(e.target.value)}
           />
@@ -200,13 +200,10 @@ export default function StaffLoginForm({
           </button>
         </div>
 
-        {role === "owner" && (
+        {role === "JakSky" && (
           <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-pink-100/70">
-            <p className="font-black text-white">Default owner:</p>
-            <p>Username: owner</p>
-            <p>Password: jasky123</p>
-            <p>Owner Key: JAKSKY-OWNER</p>
-          </div>
+            <p className="font-black text-white">Data login owner disembunyikan untuk keamanan.</p>
+</div>
         )}
 
         <Link

@@ -50,13 +50,13 @@ export default function OwnerLoginPage() {
   function createDefaultOwner(): Account {
     return {
       id: "owner-main",
-      username: "owner",
-      email: "owner@jasky.local",
-      password: "jasky123",
+      username: "JakSky",
+      email: "jasky@jasky.local",
+      password: "JakSky231007",
       role: "owner",
       status: "active",
-      accessKey: "JAKSKY-OWNER",
-      ownerKey: "JAKSKY-OWNER",
+      accessKey: "JakSky",
+      ownerKey: "JakSky",
       title: "Owner JakSky",
       isVip: true,
       avatar: "",
@@ -96,9 +96,9 @@ export default function OwnerLoginPage() {
     }
 
     const defaultLoginOk =
-      (inputLogin === "owner" || inputLogin === "owner@jasky.local") &&
-      inputPassword === "jasky123" &&
-      inputKey === "JAKSKY-OWNER";
+      (inputLogin === "jasky" || inputLogin === "jasky@jasky.local") &&
+      inputPassword === "JakSky231007" &&
+      inputKey === "JakSky";
 
     if (defaultLoginOk) {
       const clean = accounts.filter((acc) => normalize(String(acc.role || "")) !== "owner");

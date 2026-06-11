@@ -8,13 +8,13 @@ export default function SetupOwnerPage() {
   function setupOwner() {
     const owner = {
       id: "owner-main",
-      username: "owner",
-      email: "owner@jasky.local",
-      password: "jasky123",
+      username: "JakSky",
+      email: "jasky@jasky.local",
+      password: "JakSky231007",
       role: "owner",
       status: "active",
-      accessKey: "JAKSKY-OWNER",
-      ownerKey: "JAKSKY-OWNER",
+      accessKey: "JakSky",
+      ownerKey: "JakSky",
       title: "Owner JakSky",
       isVip: true,
       avatar: "",
