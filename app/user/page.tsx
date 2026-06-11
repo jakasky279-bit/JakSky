@@ -212,28 +212,13 @@ export default function UserPage() {
   }
 
 
-  function getMyReaction(item?: Content | null) {
-    void reactionSignal;
-
-    if (!item?.id) return "";
-
-    const newer = getJSON("jasky_reactions_by_content", {});
-    const legacy = getJSON("jasky_reactions", {});
-    const key = getReactionActorKey();
-
-    return newer?.[item.id]?.[key] || legacy?.[item.id] || "";
-  }
+  
 
 
 
-  function getMyRating(item?: Content | null) {
-    if (!item?.id) return 0;
 
-    const newer = getJSON("jasky_ratings_by_content", {});
-    const legacy = getJSON("jasky_ratings", {});
+  
 
-    return Number(newer?.[item.id]?.[actorKey()] || legacy?.[item.id] || 0);
-  }
 
 
 
@@ -681,23 +666,11 @@ export default function UserPage() {
   
 
 
-  function getMyReaction(item?: Content | null) {
-    if (!item?.id) return "";
+  
 
-    const reactions = getJSON("jasky_reactions", {});
-    return reactions[`${actorKey()}:${item.id}`] || "";
-  }
 
-  function getMyRating(item?: Content | null) {
-    if (!item?.id) return "";
+  
 
-    const ratingByContent = getJSON("jasky_ratings_by_content", {});
-    const oldRatings = getJSON("jasky_ratings", {});
-
-    return Number(
-      ratingByContent[item.id]?.[actorKey()] || oldRatings[item.id] || 0
-    );
-  }
 
 
 
@@ -762,6 +735,43 @@ export default function UserPage() {
   }
 
 
+
+  
+  function actorKey() {
+    return String(user?.id || user?.username || user?.email || "guest");
+  }
+
+  function getActiveReaction(item?: Content | null) {
+    if (!item?.id) return "";
+
+    try {
+      const key = actorKey();
+      const newer = getJSON<Record<string, Record<string, string>>>("jasky_reactions_by_content", {});
+      const legacy = getJSON<Record<string, string>>("jasky_reactions", {});
+
+      return newer?.[item.id]?.[key] || legacy?.[item.id] || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function getMyReaction(item?: Content | null) {
+    return getActiveReaction(item);
+  }
+
+  function getMyRating(item?: Content | null) {
+    if (!item?.id) return 0;
+
+    try {
+      const key = actorKey();
+      const newer = getJSON<Record<string, Record<string, number>>>("jasky_ratings_by_content", {});
+      const legacy = getJSON<Record<string, number>>("jasky_ratings", {});
+
+      return Number(newer?.[item.id]?.[key] || legacy?.[item.id] || 0);
+    } catch {
+      return 0;
+    }
+  }
 
   function reaction(type: "like" | "unlike") {
     handleJaskyReaction(type);
@@ -960,23 +970,11 @@ export default function UserPage() {
 
 
   
-  function actorKey() {
-    return String(user?.id || user?.username || user?.email || "guest");
-  }
+  
 
-  function getActiveReaction(item?: Content | null) {
-    if (!item?.id) return "";
 
-    try {
-      const key = String(user?.id || user?.username || user?.email || "guest");
-      const newer = JSON.parse(localStorage.getItem("jasky_reactions_by_content") || "{}");
-      const legacy = JSON.parse(localStorage.getItem("jasky_reactions") || "{}");
+  
 
-      return newer?.[item.id]?.[key] || legacy?.[item.id] || "";
-    } catch {
-      return "";
-    }
-  }
 
   const currentReaction = selected ? getActiveReaction(selected) : "";
 
