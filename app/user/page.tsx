@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 
 type CommentItem = {
+  role?: string;
   id?: string;
   user?: string;
   username?: string;
