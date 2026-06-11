@@ -23,6 +23,14 @@ type Content = {
   unlikes?: number;
   ratings?: number[];
   comments?: any[];
+
+  mediaDataUrl?: string;
+  mediaUrl?: string;
+  fileUrl?: string;
+  filename?: string;
+  thumbnail_url?: string;
+  videos?: any[];
+  content_videos?: any[];
 };
 
 export default function AdminPage() {
