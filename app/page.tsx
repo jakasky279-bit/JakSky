@@ -1,6 +1,8 @@
 import Link from "next/link";
 import JakSkyNavbar from "@/components/JakSkyNavbar";
 
+import CustomerServiceWidget from "@/components/CustomerServiceWidget";
+
 const features = [
   {
     icon: "🎬",
@@ -131,6 +133,7 @@ export default function Home() {
           </div>
         </footer>
       </section>
+          <CustomerServiceWidget />
     </main>
   );
 }
