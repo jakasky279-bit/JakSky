@@ -764,8 +764,8 @@ export default function UserPage() {
 
     try {
       const key = actorKey();
-      const newer = getJSON<Record<string, Record<string, string>>>("jasky_reactions_by_content", {});
-      const legacy = getJSON<Record<string, string>>("jasky_reactions", {});
+      const newer = getJSON("jasky_reactions_by_content", {});
+      const legacy = getJSON("jasky_reactions", {});
 
       return newer?.[item.id]?.[key] || legacy?.[item.id] || "";
     } catch {
@@ -782,8 +782,8 @@ export default function UserPage() {
 
     try {
       const key = actorKey();
-      const newer = getJSON<Record<string, Record<string, number>>>("jasky_ratings_by_content", {});
-      const legacy = getJSON<Record<string, number>>("jasky_ratings", {});
+      const newer = getJSON("jasky_ratings_by_content", {});
+      const legacy = getJSON("jasky_ratings", {});
 
       return Number(newer?.[item.id]?.[key] || legacy?.[item.id] || 0);
     } catch {
