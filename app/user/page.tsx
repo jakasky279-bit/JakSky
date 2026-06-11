@@ -4,6 +4,23 @@ import Link from "next/link";
 import { getLocalVideoUrl, saveLocalVideo } from "../../lib/localVideoStore";
 import { useEffect, useMemo, useState } from "react";
 
+
+type CommentItem = {
+  id?: string;
+  user?: string;
+  username?: string;
+  title?: string;
+  isVip?: boolean;
+  avatar?: string;
+  bio?: string;
+  text?: string;
+  createdAt?: string;
+  hidden?: boolean;
+  replyTo?: string;
+  profileBg?: string;
+  profileFrame?: string;
+};
+
 type Account = {
   id: string;
   username: string;
