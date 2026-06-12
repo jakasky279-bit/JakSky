@@ -187,7 +187,6 @@ export default function AdminUploadStudio() {
         const videoOptions: any = {
           access: "public",
           handleUploadUrl: "/api/blob/upload",
-          contentType: file.type || "video/mp4",
         };
 
         if (file.size > 50 * 1024 * 1024) {

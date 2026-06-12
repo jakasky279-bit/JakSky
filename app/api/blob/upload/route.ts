@@ -33,7 +33,6 @@ export async function POST(request: Request): Promise<NextResponse> {
             "application/octet-stream",
           ],
           maximumSizeInBytes: MAX_SIZE,
-          addRandomSuffix: true,
           tokenPayload: JSON.stringify({ app: "jasky" }),
         };
       },
