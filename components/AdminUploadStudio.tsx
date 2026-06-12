@@ -56,6 +56,18 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function safeBlobName(name: string) {
+  const clean = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return clean || `file-${Date.now()}`;
+}
+
+
 function getContents(): ContentItem[] {
   try {
     return JSON.parse(localStorage.getItem("jasky_contents") || "[]");
@@ -148,17 +160,18 @@ export default function AdminUploadStudio() {
     setInfo(`Menyiapkan upload ${videoFiles.length} video...`);
 
     try {
+      const uploadEndpoint = new URL("/api/blob/upload", window.location.origin).toString();
       let thumbnailUrl = "";
 
       if (thumbnailFile) {
         setInfo("Mengupload thumbnail...");
 
         const thumbBlob = await upload(
-          `thumbnails/${Date.now()}-${thumbnailFile.name}`,
+          `thumbnails/${Date.now()}-${safeBlobName(thumbnailFile.name)}`,
           thumbnailFile,
           {
             access: "public",
-            handleUploadUrl: "/api/blob/upload",
+            handleUploadUrl: uploadEndpoint,
           }
         );
 
@@ -173,11 +186,11 @@ export default function AdminUploadStudio() {
         setInfo(`Mengupload video ${i + 1}/${videoFiles.length}: ${file.name}`);
 
         const videoBlob = await upload(
-          `videos/${Date.now()}-${i + 1}-${file.name}`,
+          `videos/${Date.now()}-${i + 1}-${safeBlobName(file.name)}`,
           file,
           {
             access: "public",
-            handleUploadUrl: "/api/blob/upload",
+            handleUploadUrl: uploadEndpoint,
             multipart: true,
           }
         );

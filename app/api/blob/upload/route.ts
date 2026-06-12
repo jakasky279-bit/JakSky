@@ -6,7 +6,8 @@ export const runtime = "nodejs";
 const MAX_SIZE = 2 * 1024 * 1024 * 1024;
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const token = (process.env.BLOB_READ_WRITE_TOKEN || "").trim();
+  process.env.BLOB_READ_WRITE_TOKEN = token;
 
   if (!token) {
     return NextResponse.json(
