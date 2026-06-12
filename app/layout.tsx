@@ -1,6 +1,6 @@
+import SupabaseContentSync from "@/components/SupabaseContentSync";
 import type { Metadata } from "next";
 import "./globals.css";
-import CustomerServiceWidget from "@/components/CustomerServiceWidget";
 import JakSkyToast from "@/components/JakSkyToast";
 
 export const metadata: Metadata = {
@@ -41,7 +41,7 @@ export default function RootLayout({
       <body>
         <JakSkyToast />
         {children}
-          <CustomerServiceWidget />
+        <SupabaseContentSync />
       </body>
     </html>
   );
