@@ -281,13 +281,31 @@ export default function AdminUploadStudio() {
     }
   }
 
-  function deleteContent(id: string) {
-    const ok = confirm("Hapus dari tampilan lokal admin?");
+  async function deleteContent(id: string) {
+    const ok = confirm("Hapus konten ini dari online? Setelah refresh tidak akan muncul lagi.");
     if (!ok) return;
 
-    const next = getContents().filter((item) => item.id !== id);
-    saveContents(next);
-    setContents(next);
+    try {
+      setInfo("Menghapus konten online...");
+
+      const { error } = await supabase
+        .from("jasky_online_contents")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      const next = getContents().filter((item) => item.id !== id);
+      saveContents(next);
+      setContents(next);
+      setInfo("");
+
+      alert("Konten berhasil dihapus dari online.");
+    } catch (error) {
+      console.error(error);
+      setInfo("");
+      alert(error instanceof Error ? `Gagal hapus: ${error.message}` : "Gagal hapus konten.");
+    }
   }
 
   function deleteNoVideo() {
@@ -508,7 +526,7 @@ export default function AdminUploadStudio() {
                     </p>
 
                     <button type="button" onClick={() => deleteContent(item.id)} className="mt-4 w-full rounded-2xl bg-red-500/20 px-4 py-3 font-black text-red-100">
-                      Hapus Tampilan Lokal
+                      Hapus Online
                     </button>
                   </div>
                 </article>
