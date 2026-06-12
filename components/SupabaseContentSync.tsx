@@ -3,7 +3,15 @@
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-function mapContent(item: any) {
+function getLocalContents() {
+  try {
+    return JSON.parse(localStorage.getItem("jasky_contents") || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function mapContent(item: any, oldItem: any) {
   const videos = Array.isArray(item.jasky_online_videos)
     ? item.jasky_online_videos
         .sort((a: any, b: any) => Number(a.position || 0) - Number(b.position || 0))
@@ -47,11 +55,13 @@ function mapContent(item: any) {
     createdAt: item.created_at || new Date().toISOString(),
     videos,
     content_videos: videos,
-    views: 0,
-    likes: 0,
-    unlikes: 0,
-    ratings: [],
-    comments: [],
+
+    // INI YANG PENTING: jangan hapus data interaksi lokal
+    views: oldItem?.views || 0,
+    likes: oldItem?.likes || 0,
+    unlikes: oldItem?.unlikes || 0,
+    ratings: Array.isArray(oldItem?.ratings) ? oldItem.ratings : [],
+    comments: Array.isArray(oldItem?.comments) ? oldItem.comments : [],
   };
 }
 
@@ -60,6 +70,9 @@ export default function SupabaseContentSync() {
     let alive = true;
 
     async function load() {
+      const oldContents = getLocalContents();
+      const oldById = new Map(oldContents.map((item: any) => [item.id, item]));
+
       const { data, error } = await supabase
         .from("jasky_online_contents")
         .select("*, jasky_online_videos(*)")
@@ -67,7 +80,9 @@ export default function SupabaseContentSync() {
 
       if (!alive || error || !data) return;
 
-      localStorage.setItem("jasky_contents", JSON.stringify(data.map(mapContent)));
+      const next = data.map((item: any) => mapContent(item, oldById.get(item.id)));
+
+      localStorage.setItem("jasky_contents", JSON.stringify(next));
       window.dispatchEvent(new Event("jasky-sync"));
     }
 
