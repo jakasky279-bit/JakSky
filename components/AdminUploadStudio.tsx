@@ -56,6 +56,16 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Gagal membaca file thumbnail."));
+    reader.readAsDataURL(file);
+  });
+}
+
 function safeBlobName(name: string) {
   const clean = name
     .normalize("NFKD")
@@ -160,22 +170,11 @@ export default function AdminUploadStudio() {
     setInfo(`Menyiapkan upload ${videoFiles.length} video...`);
 
     try {
-      const uploadEndpoint = new URL("/api/blob/upload", window.location.origin).toString();
       let thumbnailUrl = "";
 
       if (thumbnailFile) {
-        setInfo("Mengupload thumbnail...");
-
-        const thumbBlob = await upload(
-          `thumbnails/${Date.now()}-${safeBlobName(thumbnailFile.name)}`,
-          thumbnailFile,
-          {
-            access: "public",
-            handleUploadUrl: uploadEndpoint,
-          }
-        );
-
-        thumbnailUrl = thumbBlob.url;
+        setInfo("Membaca thumbnail...");
+        thumbnailUrl = await readFileAsDataUrl(thumbnailFile);
       }
 
       const uploadedVideos: UploadedVideo[] = [];
@@ -185,14 +184,20 @@ export default function AdminUploadStudio() {
 
         setInfo(`Mengupload video ${i + 1}/${videoFiles.length}: ${file.name}`);
 
+        const videoOptions: any = {
+          access: "public",
+          handleUploadUrl: "/api/blob/upload",
+          contentType: file.type || "video/mp4",
+        };
+
+        if (file.size > 50 * 1024 * 1024) {
+          videoOptions.multipart = true;
+        }
+
         const videoBlob = await upload(
           `videos/${Date.now()}-${i + 1}-${safeBlobName(file.name)}`,
           file,
-          {
-            access: "public",
-            handleUploadUrl: uploadEndpoint,
-            multipart: true,
-          }
+          videoOptions
         );
 
         uploadedVideos.push({
