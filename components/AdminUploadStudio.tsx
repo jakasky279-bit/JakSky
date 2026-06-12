@@ -51,6 +51,7 @@ type ContentItem = {
 
 const MAX_VIDEO_COUNT = 30;
 const MAX_VIDEO_SIZE = 2 * 1024 * 1024 * 1024;
+const UPLOAD_BUILD_VERSION = "blob-clean-v4";
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
