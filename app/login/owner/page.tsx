@@ -5,13 +5,13 @@ import { useState } from "react";
 
 const OWNER = {
   id: "owner-main",
-  username: "JakSky",
+  username: "jasky",
   email: "jasky@jasky.local",
-  password: "JakSky231007",
+  password: "jasky",
   role: "owner",
   status: "active",
-  accessKey: "JakSky",
-  ownerKey: "JakSky",
+  accessKey: "jasky",
+  ownerKey: "jasky",
   title: "Owner JakSky",
   isVip: true,
   avatar: "",
@@ -55,11 +55,11 @@ export default function OwnerLoginPage() {
     setError("");
 
     const usernameOk = clean(username) === "jasky";
-    const passwordOk = clean(password) === "jasky231007";
+    const passwordOk = clean(password) === "jasky";
     const keyOk = clean(ownerKey) === "jasky";
 
     if (!usernameOk || !passwordOk || !keyOk) {
-      setError("Login owner gagal. Periksa username, password, dan owner key.");
+      setError("Login owner gagal. Isi semua: jasky / jasky / jasky.");
       return;
     }
 
