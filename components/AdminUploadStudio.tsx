@@ -182,14 +182,22 @@ export default function AdminUploadStudio() {
         const file = videoFiles[i];
         setInfo(`Mengupload video ${i + 1}/${videoFiles.length}: ${file.name}`);
 
+        const uploadOptions =
+          file.size > 100 * 1024 * 1024
+            ? {
+                access: "public" as const,
+                handleUploadUrl: "/api/blob/upload",
+                multipart: true,
+              }
+            : {
+                access: "public" as const,
+                handleUploadUrl: "/api/blob/upload",
+              };
+
         const videoBlob = await upload(
           `videos/${Date.now()}-${i + 1}-${safeBlobName(file.name)}`,
           file,
-          {
-            access: "public",
-            handleUploadUrl: "/api/blob/upload",
-            multipart: true,
-          }
+          uploadOptions
         );
 
         uploadedVideos.push({
