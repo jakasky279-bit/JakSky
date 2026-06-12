@@ -102,6 +102,9 @@ export default function AdminUploadStudio() {
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState("");
+  const [doneMessage, setDoneMessage] = useState("");
+  const [uploadTotal, setUploadTotal] = useState(0);
+  const [uploadedCount, setUploadedCount] = useState(0);
 
   useEffect(() => {
     setContents(getContents());
@@ -149,6 +152,9 @@ export default function AdminUploadStudio() {
       return;
     }
 
+    setDoneMessage("");
+    setUploadedCount(0);
+    setUploadTotal(videoFiles.length);
     setLoading(true);
 
     try {
@@ -184,8 +190,10 @@ export default function AdminUploadStudio() {
       for (let i = 0; i < videoFiles.length; i++) {
         const file = videoFiles[i];
         setInfo(`Mengupload video ${i + 1}/${videoFiles.length}: ${file.name}`);
+        setUploadedCount(i);
 
         const videoUrl = await uploadToSupabase(file, "videos");
+        setUploadedCount(i + 1);
 
         videoRows.push({
           content_id: content.id,
@@ -261,9 +269,11 @@ export default function AdminUploadStudio() {
       setThumbnailFile(null);
       setVideoFiles([]);
       setInfo("");
+      setDoneMessage(`Upload selesai: ${localItem.title} berhasil online (${mappedVideos.length} video). Cek halaman user.`);
 
       alert("Upload berhasil. Konten sudah online dan muncul di halaman user.");
     } catch (error) {
+      setDoneMessage("");
       console.error(error);
       alert(error instanceof Error ? `Upload gagal: ${error.message}` : "Upload gagal.");
     } finally {
@@ -412,6 +422,42 @@ export default function AdminUploadStudio() {
             {info && (
               <div className="rounded-2xl border border-yellow-300/25 bg-yellow-500/10 px-4 py-4 text-sm font-bold text-yellow-100">
                 {info}
+              </div>
+            )}
+
+            {loading && uploadTotal > 0 && (
+              <div className="rounded-2xl border border-blue-300/25 bg-blue-500/10 p-4">
+                <div className="flex items-center justify-between gap-3 text-sm font-black text-blue-100">
+                  <span>Progress upload</span>
+                  <span>{uploadedCount}/{uploadTotal} video</span>
+                </div>
+
+                <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-sky-400 to-fuchsia-500 transition-all"
+                    style={{
+                      width: `${uploadTotal ? Math.round((uploadedCount / uploadTotal) * 100) : 0}%`,
+                    }}
+                  />
+                </div>
+
+                <p className="mt-2 text-xs font-bold text-white/55">
+                  Tunggu sampai muncul pesan selesai. Jangan tutup halaman saat upload.
+                </p>
+              </div>
+            )}
+
+            {doneMessage && (
+              <div className="rounded-2xl border border-emerald-300/25 bg-emerald-500/10 p-4">
+                <p className="text-lg font-black text-emerald-100">✅ Upload Selesai</p>
+                <p className="mt-2 text-sm font-bold text-white/70">{doneMessage}</p>
+
+                <Link
+                  href="/user"
+                  className="mt-4 inline-flex rounded-2xl bg-gradient-to-r from-emerald-400 to-sky-500 px-5 py-3 text-sm font-black text-white"
+                >
+                  Lihat di Halaman User
+                </Link>
               </div>
             )}
 
