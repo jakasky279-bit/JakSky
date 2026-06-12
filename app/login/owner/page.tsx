@@ -1,22 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Account = {
-  id?: string;
-  username?: string;
-  email?: string;
-  password?: string;
-  role?: string;
-  status?: string;
-  accessKey?: string;
-  ownerKey?: string;
-  title?: string;
-  isVip?: boolean;
-  avatar?: string;
-  bio?: string;
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  role: "owner";
+  status: "active";
+  accessKey: string;
+  ownerKey: string;
+  title: string;
+  isVip: boolean;
+  avatar: string;
+  bio: string;
+};
+
+const OWNER: Account = {
+  id: "owner-main",
+  username: "JakSky",
+  email: "jasky@jasky.local",
+  password: "JakSky231007",
+  role: "owner",
+  status: "active",
+  accessKey: "JakSky",
+  ownerKey: "JakSky",
+  title: "Owner JakSky",
+  isVip: true,
+  avatar: "",
+  bio: "",
 };
 
 function getJSON<T>(key: string, fallback: T): T {
@@ -28,89 +42,52 @@ function getJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function saveOwnerSession(owner: Account) {
-  localStorage.setItem("jasky_staff_session", JSON.stringify(owner));
-  localStorage.setItem("jasky_current_user", JSON.stringify(owner));
-  localStorage.setItem("jasky_login_user_id", owner.id || "owner-main");
-  window.dispatchEvent(new Event("jasky-sync"));
-}
-
-function normalize(value: string) {
+function cleanLogin(value: string) {
   return value.trim().toLowerCase();
 }
 
-export default function OwnerLoginPage() {
-  const router = useRouter();
+function cleanKey(value: string) {
+  return value.replace(/[\s_-]/g, "").trim().toUpperCase();
+}
 
-  const [login, setLogin] = useState("");
+function saveOwnerSession() {
+  const accounts = getJSON<any[]>("jasky_accounts", []);
+  const nonOwners = accounts.filter(
+    (acc) => String(acc.role || "").toLowerCase() !== "owner"
+  );
+
+  localStorage.setItem("jasky_accounts", JSON.stringify([OWNER, ...nonOwners]));
+  localStorage.setItem("jasky_staff_session", JSON.stringify(OWNER));
+  localStorage.setItem("jasky_current_user", JSON.stringify(OWNER));
+  localStorage.setItem("jasky_login_user_id", OWNER.id);
+  window.dispatchEvent(new Event("jasky-sync"));
+}
+
+export default function OwnerLoginPage() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [ownerKey, setOwnerKey] = useState("");
   const [error, setError] = useState("");
-
-  function createDefaultOwner(): Account {
-    return {
-      id: "owner-main",
-      username: "JakSky",
-      email: "jasky@jasky.local",
-      password: "JakSky231007",
-      role: "owner",
-      status: "active",
-      accessKey: "JakSky",
-      ownerKey: "JakSky",
-      title: "Owner JakSky",
-      isVip: true,
-      avatar: "",
-      bio: "",
-    };
-  }
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
-    const inputLogin = normalize(login);
-    const inputPassword = password.trim();
-    const inputKey = ownerKey.trim();
+    const u = cleanLogin(username);
+    const p = password.trim();
+    const k = cleanKey(ownerKey);
 
-    const accounts = getJSON<Account[]>("jasky_accounts", []);
-    const defaultOwner = createDefaultOwner();
+    const usernameOk = u === "jasky" || u === "jasky@jasky.local";
+    const passwordOk = p === "JakSky231007";
+    const keyOk = k === "JAKSKY";
 
-    const found = accounts.find((acc) => {
-      const role = normalize(String(acc.role || ""));
-      const status = normalize(String(acc.status || "active"));
-
-      const sameLogin =
-        normalize(String(acc.username || "")) === inputLogin ||
-        normalize(String(acc.email || "")) === inputLogin;
-
-      const samePassword = String(acc.password || "") === inputPassword;
-      const sameKey = String(acc.accessKey || acc.ownerKey || "") === inputKey;
-
-      return role === "owner" && status !== "disabled" && sameLogin && samePassword && sameKey;
-    });
-
-    if (found) {
-      saveOwnerSession(found);
-      router.push("/owner");
+    if (!usernameOk || !passwordOk || !keyOk) {
+      setError("Login owner gagal. Gunakan Username: JakSky, Password: JakSky231007, Owner Key: JakSky.");
       return;
     }
 
-    const defaultLoginOk =
-      (inputLogin === "jasky" || inputLogin === "jasky@jasky.local") &&
-      inputPassword === "JakSky231007" &&
-      inputKey === "JakSky";
-
-    if (defaultLoginOk) {
-      const clean = accounts.filter((acc) => normalize(String(acc.role || "")) !== "owner");
-      const next = [defaultOwner, ...clean];
-
-      localStorage.setItem("jasky_accounts", JSON.stringify(next));
-      saveOwnerSession(defaultOwner);
-      router.push("/owner");
-      return;
-    }
-
-    setError("Login owner gagal. Periksa username, password, dan owner key.");
+    saveOwnerSession();
+    window.location.href = "/owner";
   }
 
   return (
@@ -136,10 +113,10 @@ export default function OwnerLoginPage() {
 
           <div className="mt-8 space-y-4">
             <input
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               placeholder="Username atau email"
-              className="w-full rounded-2xl border border-pink-400/35 bg-white/10 px-5 py-5 text-lg text-white outline-none placeholder:text-white/35 focus:border-pink-300"
+              className="w-full rounded-2xl border border-pink-400/35 bg-white/10 px-5 py-5 text-lg text-white outline-none placeholder:text-white/35"
             />
 
             <input
@@ -147,7 +124,7 @@ export default function OwnerLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="Kata sandi"
-              className="w-full rounded-2xl border border-pink-400/35 bg-white/10 px-5 py-5 text-lg text-white outline-none placeholder:text-white/35 focus:border-pink-300"
+              className="w-full rounded-2xl border border-pink-400/35 bg-white/10 px-5 py-5 text-lg text-white outline-none placeholder:text-white/35"
             />
 
             <input
@@ -155,7 +132,7 @@ export default function OwnerLoginPage() {
               onChange={(e) => setOwnerKey(e.target.value)}
               type="password"
               placeholder="Owner key"
-              className="w-full rounded-2xl border border-pink-400/35 bg-white/10 px-5 py-5 text-lg text-white outline-none placeholder:text-white/35 focus:border-pink-300"
+              className="w-full rounded-2xl border border-pink-400/35 bg-white/10 px-5 py-5 text-lg text-white outline-none placeholder:text-white/35"
             />
           </div>
 
@@ -167,15 +144,12 @@ export default function OwnerLoginPage() {
 
           <button
             type="submit"
-            className="mt-6 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-6 py-5 text-lg font-black text-white shadow-[0_18px_45px_rgba(236,72,153,.35)] active:scale-[.99]"
+            className="mt-6 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-6 py-5 text-lg font-black text-white"
           >
             Masuk Sekarang
           </button>
 
-          <Link
-            href="/"
-            className="mt-7 block text-center text-lg font-medium text-white/45 hover:text-white"
-          >
+          <Link href="/" className="mt-7 block text-center text-lg font-medium text-white/45">
             Kembali ke Beranda
           </Link>
         </form>
