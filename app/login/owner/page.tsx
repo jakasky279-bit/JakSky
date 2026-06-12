@@ -54,21 +54,17 @@ export default function OwnerLoginPage() {
     e.preventDefault();
     setError("");
 
-    const all = `${clean(username)} ${clean(password)} ${clean(ownerKey)}`;
-
     const usernameOk = clean(username) === "jasky";
     const passwordOk = clean(password) === "jasky231007";
     const keyOk = clean(ownerKey) === "jasky";
 
-    const emergencyOk = all.includes("jasky") && clean(password).includes("231007");
-
-    if ((usernameOk && passwordOk && keyOk) || emergencyOk) {
-      saveOwnerSession();
-      window.location.href = "/owner";
+    if (!usernameOk || !passwordOk || !keyOk) {
+      setError("Login owner gagal. Periksa username, password, dan owner key.");
       return;
     }
 
-    setError("Login gagal. Isi: JakSky / JakSky231007 / JakSky.");
+    saveOwnerSession();
+    window.location.href = "/owner";
   }
 
   return (
@@ -128,17 +124,6 @@ export default function OwnerLoginPage() {
             className="mt-6 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-6 py-5 text-lg font-black text-white"
           >
             Masuk Sekarang
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              saveOwnerSession();
-              window.location.href = "/owner";
-            }}
-            className="mt-4 w-full rounded-2xl border border-white/10 bg-white/10 px-6 py-4 font-black text-white"
-          >
-            Masuk Owner Cepat
           </button>
 
           <Link href="/" className="mt-7 block text-center text-lg font-medium text-white/45">
