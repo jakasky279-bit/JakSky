@@ -47,7 +47,11 @@ function cleanLogin(value: string) {
 }
 
 function cleanKey(value: string) {
-  return value.replace(/[\s_-]/g, "").trim().toUpperCase();
+  return value.replace(/[^a-zA-Z0-9]/g, "").trim().toUpperCase();
+}
+
+function cleanPassword(value: string) {
+  return value.replace(/[^a-zA-Z0-9]/g, "").trim().toLowerCase();
 }
 
 function saveOwnerSession() {
@@ -74,11 +78,11 @@ export default function OwnerLoginPage() {
     setError("");
 
     const u = cleanLogin(username);
-    const p = password.trim();
+    const p = cleanPassword(password);
     const k = cleanKey(ownerKey);
 
     const usernameOk = u === "jasky" || u === "jasky@jasky.local";
-    const passwordOk = p === "JakSky231007";
+    const passwordOk = p === "jasky231007";
     const keyOk = k === "JAKSKY";
 
     if (!usernameOk || !passwordOk || !keyOk) {
