@@ -335,7 +335,8 @@ export default function UserPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari judul video..."
-              className="min-w-0 flex-1 bg-transparent text-base font-bold text-white outline-none placeholder:text-white/35"
+              className="min-w-0 flex-1 appearance-none border-0 bg-transparent p-0 text-base font-bold text-white outline-none ring-0 shadow-none placeholder:text-white/35 focus:border-0 focus:outline-none focus:ring-0"
+              style={{ border: 0, boxShadow: "none" }}
             />
 
             {query && (
