@@ -172,6 +172,8 @@ export default function UserPage() {
 
   const favorites = getJSON<Record<string, boolean>>("jasky_favorites", {});
   const ratings = getJSON<Record<string, number>>("jasky_ratings", {});
+  const reactions = getJSON<Record<string, "like" | "unlike">>("jasky_reactions", {});
+  const selectedReaction = selected ? reactions[selected.id] : "";
 
   const filteredContents = useMemo(() => {
     let list = [...contents];
@@ -470,11 +472,26 @@ export default function UserPage() {
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <button onClick={() => react("like")} className="rounded-2xl bg-white/10 px-5 py-4 font-black">
-                🤍 Like {selected.likes ? `(${selected.likes})` : ""}
+              <button
+                onClick={() => react("like")}
+                className={
+                  selectedReaction === "like"
+                    ? "rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-5 py-4 font-black text-white shadow-lg shadow-pink-500/20 ring-2 ring-pink-300/40"
+                    : "rounded-2xl bg-white/10 px-5 py-4 font-black text-white/80"
+                }
+              >
+                {selectedReaction === "like" ? "❤️ Disukai" : "🤍 Like"} {selected.likes ? `(${selected.likes})` : ""}
               </button>
-              <button onClick={() => react("unlike")} className="rounded-2xl bg-white/10 px-5 py-4 font-black">
-                👎 Unlike {selected.unlikes ? `(${selected.unlikes})` : ""}
+
+              <button
+                onClick={() => react("unlike")}
+                className={
+                  selectedReaction === "unlike"
+                    ? "rounded-2xl bg-gradient-to-r from-amber-500 to-red-600 px-5 py-4 font-black text-white shadow-lg shadow-red-500/20 ring-2 ring-amber-300/40"
+                    : "rounded-2xl bg-white/10 px-5 py-4 font-black text-white/80"
+                }
+              >
+                {selectedReaction === "unlike" ? "👎 Tidak suka" : "👎 Unlike"} {selected.unlikes ? `(${selected.unlikes})` : ""}
               </button>
             </div>
 
