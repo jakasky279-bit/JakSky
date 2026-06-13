@@ -325,13 +325,35 @@ export default function UserPage() {
           </p>
         </section>
 
-        <div className="mt-7 rounded-3xl border border-pink-400/25 bg-white/10 px-5 py-4">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="🔍 Cari video..."
-            className="w-full bg-transparent text-lg text-white outline-none placeholder:text-white/40"
-          />
+        <div className="mt-7 rounded-[32px] border border-pink-300/30 bg-white/[0.09] p-2 shadow-[0_18px_55px_rgba(236,72,153,0.25)] backdrop-blur-2xl">
+          <div className="flex items-center gap-3 rounded-[26px] border border-white/10 bg-black/35 px-4 py-4 shadow-inner">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 via-purple-600 to-sky-500 text-lg shadow-lg shadow-pink-500/20">
+              🔎
+            </div>
+
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari judul video..."
+              className="min-w-0 flex-1 bg-transparent text-base font-bold text-white outline-none placeholder:text-white/35"
+            />
+
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-xl font-black text-white/75 active:scale-95"
+                aria-label="Hapus pencarian"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between px-3 pb-2 pt-3 text-xs font-bold text-white/45">
+            <span>{query.trim() ? `Mencari: ${query}` : "Cari berdasarkan judul atau deskripsi"}</span>
+            <span>{filteredContents.length} konten</span>
+          </div>
         </div>
 
         <div className="mt-5 flex gap-3 overflow-x-auto pb-2">
