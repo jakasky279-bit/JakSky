@@ -13,11 +13,24 @@ type CommentItem = {
   id: string;
   user: string;
   title?: string;
+  role?: string;
+  email?: string;
   isVip?: boolean;
   avatar?: string;
+  bio?: string;
   text: string;
   createdAt: string;
   hidden?: boolean;
+};
+
+type ProfilePreview = {
+  username: string;
+  email?: string;
+  title?: string;
+  role?: string;
+  isVip?: boolean;
+  avatar?: string;
+  bio?: string;
 };
 
 type ContentItem = {
@@ -141,6 +154,66 @@ function formatDate(value: string) {
   }
 }
 
+function cleanRole(role?: string) {
+  const value = String(role || "").toLowerCase();
+  if (value === "owner") return "Owner";
+  if (value === "admin") return "Admin";
+  if (value === "moderator") return "Moderator";
+  return "User";
+}
+
+function getNiceTitle(profile?: any) {
+  const title = String(profile?.title || "").trim();
+  const role = String(profile?.role || "").toLowerCase();
+
+  if (title && title.toLowerCase() !== "member jasky") return title;
+  if (role === "owner") return "Owner JakSky";
+  if (role === "admin") return "Admin JakSky";
+  if (role === "moderator") return "Moderator JakSky";
+  return "Member JakSky";
+}
+
+function findProfileFromComment(comment: CommentItem): ProfilePreview {
+  const accounts = getJSON<Account[]>("jasky_accounts", []);
+  const current = getJSON<Account | null>("jasky_current_user", null);
+
+  const all = [
+    ...(Array.isArray(accounts) ? accounts : []),
+    ...(current ? [current] : []),
+  ];
+
+  const match = all.find((account) => {
+    const userMatch =
+      account.username &&
+      comment.user &&
+      account.username.toLowerCase() === comment.user.toLowerCase();
+
+    const emailMatch =
+      account.email &&
+      comment.email &&
+      account.email.toLowerCase() === comment.email.toLowerCase();
+
+    return userMatch || emailMatch;
+  });
+
+  return {
+    username: match?.username || comment.user || "User JakSky",
+    email: match?.email || comment.email || "",
+    role: match?.role || comment.role || "",
+    title: getNiceTitle(match || comment),
+    isVip: Boolean(match?.isVip || comment.isVip || match?.role === "owner"),
+    avatar: match?.avatar || comment.avatar || "",
+    bio:
+      match?.bio ||
+      comment.bio ||
+      (match?.role === "admin"
+        ? "Akun admin JakSky. Bertugas mengelola dan mengupload konten."
+        : match?.role === "owner"
+          ? "Pemilik platform JakSky."
+          : "Member JakSky."),
+  };
+}
+
 export default function UserPage() {
   const [contents, setLocalContents] = useState<ContentItem[]>([]);
   const [selected, setSelected] = useState<ContentItem | null>(null);
@@ -149,6 +222,7 @@ export default function UserPage() {
   const [filter, setFilter] = useState("Semua");
   const [commentText, setCommentText] = useState("");
   const [currentUser, setCurrentUser] = useState<Account | null>(null);
+  const [profilePreview, setProfilePreview] = useState<ProfilePreview | null>(null);
 
   function load() {
     setLocalContents(getJSON<ContentItem[]>("jasky_contents", []));
@@ -293,9 +367,12 @@ export default function UserPage() {
     const newComment: CommentItem = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       user: username,
-      title: user.title || (user.role === "owner" ? "Owner JakSky" : "Member JakSky"),
+      email: user.email || "",
+      role: user.role || "user",
+      title: getNiceTitle(user),
       isVip: Boolean(user.isVip || user.role === "owner"),
       avatar: user.avatar || "",
+      bio: user.bio || "",
       text: commentText.trim(),
       createdAt: new Date().toISOString(),
     };
@@ -565,19 +642,30 @@ export default function UserPage() {
                   {visibleComments.length === 0 ? (
                     <p className="rounded-2xl bg-white/5 p-4 text-white/45">Belum ada komentar.</p>
                   ) : (
-                    visibleComments.map((comment) => (
-                      <article key={comment.id} className="rounded-3xl border border-white/10 bg-white/10 p-4">
+                    visibleComments.map((comment) => {
+                      const profile = findProfileFromComment(comment);
+
+                      return (
+                      <article
+                        key={comment.id}
+                        onClick={() => setProfilePreview(profile)}
+                        className="cursor-pointer rounded-3xl border border-white/10 bg-white/10 p-4 transition active:scale-[0.99]"
+                      >
                         <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-pink-400 to-blue-500" />
+                          {profile.avatar ? (
+                            <img src={profile.avatar} alt="" className="h-12 w-12 rounded-2xl object-cover" />
+                          ) : (
+                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-pink-400 to-blue-500" />
+                          )}
                           <div>
-                            <p className="font-black">{comment.user}</p>
+                            <p className="font-black">{profile.username}</p>
                             <div className="flex flex-wrap gap-2">
-                              {comment.title && (
+                              {profile.title && (
                                 <span className="rounded-full bg-pink-500/20 px-3 py-1 text-xs font-black text-pink-100">
-                                  {comment.title}
+                                  {profile.title}
                                 </span>
                               )}
-                              {comment.isVip && (
+                              {profile.isVip && (
                                 <span className="rounded-full bg-pink-500/20 px-3 py-1 text-xs font-black text-pink-100">
                                   VIP
                                 </span>
@@ -594,6 +682,73 @@ export default function UserPage() {
                 </div>
               </section>
             )}
+          </section>
+        </div>
+      )}
+
+      {profilePreview && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 p-5 backdrop-blur-xl">
+          <section className="w-full max-w-md rounded-[34px] border border-pink-400/25 bg-black/90 p-6 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {profilePreview.avatar ? (
+                  <img
+                    src={profilePreview.avatar}
+                    alt=""
+                    className="h-20 w-20 rounded-[28px] object-cover"
+                  />
+                ) : (
+                  <div className="h-20 w-20 rounded-[28px] bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 shadow-lg shadow-pink-500/20" />
+                )}
+
+                <div className="min-w-0">
+                  <h3 className="truncate text-2xl font-black">{profilePreview.username}</h3>
+                  <p className="mt-1 text-sm font-bold text-white/45">
+                    {cleanRole(profilePreview.role)}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setProfilePreview(null)}
+                className="rounded-2xl bg-white/10 px-4 py-2 text-xl font-black"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full bg-pink-500/20 px-4 py-2 text-sm font-black text-pink-100">
+                {profilePreview.title || "Member JakSky"}
+              </span>
+
+              {profilePreview.isVip && (
+                <span className="rounded-full bg-yellow-400/20 px-4 py-2 text-sm font-black text-yellow-100">
+                  VIP
+                </span>
+              )}
+            </div>
+
+            <div className="mt-5 rounded-3xl border border-white/10 bg-white/5 p-4">
+              <p className="text-sm font-bold text-white/45">Bio</p>
+              <p className="mt-2 text-white/80">
+                {profilePreview.bio || "Belum ada bio profil."}
+              </p>
+            </div>
+
+            {profilePreview.email && (
+              <div className="mt-3 rounded-3xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-bold text-white/45">Email</p>
+                <p className="mt-2 break-all text-white/80">{profilePreview.email}</p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setProfilePreview(null)}
+              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-5 py-4 font-black"
+            >
+              Tutup Profil
+            </button>
           </section>
         </div>
       )}
