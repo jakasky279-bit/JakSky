@@ -677,7 +677,7 @@ export default function UserPage() {
                         <p className="mt-4 text-white/80">{comment.text}</p>
                         <p className="mt-3 text-xs text-white/35">{formatDate(comment.createdAt)}</p>
                       </article>
-))
+                      );
                   )}
                 </div>
               </section>
