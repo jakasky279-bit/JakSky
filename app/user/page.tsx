@@ -301,6 +301,43 @@ function getProfileWatchHistory(profile: ProfilePreview) {
 }
 
 
+function readAvatarAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const raw = String(reader.result || "");
+      const img = new Image();
+
+      img.onload = () => {
+        const maxSize = 512;
+        const scale = Math.min(1, maxSize / img.width, maxSize / img.height);
+        const width = Math.max(1, Math.round(img.width * scale));
+        const height = Math.max(1, Math.round(img.height * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(raw);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.86));
+      };
+
+      img.onerror = () => resolve(raw);
+      img.src = raw;
+    };
+
+    reader.onerror = () => reject(new Error("Gagal membaca gambar."));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function UserPage() {
   const [contents, setLocalContents] = useState<ContentItem[]>([]);
   const [selected, setSelected] = useState<ContentItem | null>(null);
@@ -310,6 +347,11 @@ export default function UserPage() {
   const [commentText, setCommentText] = useState("");
   const [currentUser, setCurrentUser] = useState<Account | null>(null);
   const [profilePreview, setProfilePreview] = useState<ProfilePreview | null>(null);
+  const [showMyProfile, setShowMyProfile] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileTitle, setProfileTitle] = useState("");
+  const [profileBio, setProfileBio] = useState("");
+  const [profileAvatar, setProfileAvatar] = useState("");
 
   function load() {
     setLocalContents(getJSON<ContentItem[]>("jasky_contents", []));
@@ -473,6 +515,77 @@ export default function UserPage() {
     setCommentText("");
   }
 
+  function openMyProfile() {
+    const user = currentUser || {};
+    setProfileName(user.username || user.email || "User JakSky");
+    setProfileTitle(getNiceTitle(user));
+    setProfileBio(user.bio || "");
+    setProfileAvatar(user.avatar || "");
+    setShowMyProfile(true);
+  }
+
+  async function chooseAvatarFromGallery(event: any) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Pilih file gambar ya.");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert("Foto terlalu besar. Maksimal 8MB.");
+      return;
+    }
+
+    try {
+      const avatarDataUrl = await readAvatarAsDataUrl(file);
+      setProfileAvatar(avatarDataUrl);
+    } catch {
+      alert("Gagal membaca foto dari galeri.");
+    }
+  }
+
+  function saveMyProfile() {
+    const oldUser = currentUser || {};
+
+    const nextUser: Account = {
+      ...oldUser,
+      username: profileName.trim() || oldUser.username || "User JakSky",
+      title: profileTitle.trim() || getNiceTitle(oldUser),
+      bio: profileBio.trim(),
+      avatar: profileAvatar.trim(),
+    };
+
+    localStorage.setItem("jasky_current_user", JSON.stringify(nextUser));
+
+    const accounts = getJSON<Account[]>("jasky_accounts", []);
+    let found = false;
+
+    const nextAccounts = accounts.map((account) => {
+      const sameId = account.id && nextUser.id && account.id === nextUser.id;
+      const sameEmail = account.email && nextUser.email && account.email === nextUser.email;
+      const sameUser = account.username && oldUser.username && account.username === oldUser.username;
+
+      if (sameId || sameEmail || sameUser) {
+        found = true;
+        return { ...account, ...nextUser };
+      }
+
+      return account;
+    });
+
+    if (!found && nextUser.username) {
+      nextAccounts.push(nextUser);
+    }
+
+    localStorage.setItem("jasky_accounts", JSON.stringify(nextAccounts));
+    setCurrentUser(nextUser);
+    setShowMyProfile(false);
+    window.dispatchEvent(new Event("jasky-sync"));
+    alert("Profil berhasil disimpan.");
+  }
+
   const selectedVideos = selected ? getVideos(selected) : [];
   const activeVideo = selectedVideos[activeVideoIndex] || selectedVideos[0];
   const visibleComments = (selected?.comments || []).filter((comment) => !comment.hidden);
@@ -490,6 +603,43 @@ export default function UserPage() {
           <p className="mx-auto mt-5 inline-flex rounded-full bg-pink-500/15 px-6 py-3 font-black text-pink-100">
             Update video terbaru setiap hari
           </p>
+        </section>
+
+        <section className="mt-5 rounded-[28px] border border-white/10 bg-black/40 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={openMyProfile}
+              className="flex min-w-0 flex-1 items-center gap-3 rounded-[24px] bg-white/10 p-3 text-left active:scale-[0.99]"
+            >
+              {currentUser?.avatar ? (
+                <img
+                  src={currentUser.avatar}
+                  alt=""
+                  className="h-14 w-14 rounded-2xl object-cover"
+                />
+              ) : (
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-2xl">
+                  👤
+                </div>
+              )}
+
+              <div className="min-w-0">
+                <p className="truncate text-lg font-black">
+                  {currentUser?.username || currentUser?.email || "Profil Saya"}
+                </p>
+                <p className="mt-1 truncate text-xs font-bold text-white/45">
+                  {getNiceTitle(currentUser || {})} • Klik untuk ubah profil
+                </p>
+              </div>
+            </button>
+
+            <button
+              onClick={openMyProfile}
+              className="shrink-0 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-4 py-4 text-sm font-black"
+            >
+              Edit
+            </button>
+          </div>
         </section>
 
         <div className="mt-7 rounded-[32px] border border-pink-300/30 bg-white/[0.09] p-2 shadow-[0_18px_55px_rgba(236,72,153,0.25)] backdrop-blur-2xl">
@@ -778,6 +928,130 @@ export default function UserPage() {
                 </div>
               </section>
             )}
+          </section>
+        </div>
+      )}
+
+      {showMyProfile && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/75 p-5 backdrop-blur-xl">
+          <section className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[34px] border border-pink-400/25 bg-black/90 p-6 text-white shadow-2xl">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-pink-200/70">
+                  Akun
+                </p>
+                <h2 className="mt-1 text-3xl font-black">Profil Saya</h2>
+              </div>
+
+              <button
+                onClick={() => setShowMyProfile(false)}
+                className="rounded-2xl bg-white/10 px-4 py-2 text-xl font-black"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-5 flex items-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-4">
+              {profileAvatar ? (
+                <img
+                  src={profileAvatar}
+                  alt=""
+                  className="h-20 w-20 rounded-[28px] object-cover"
+                />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-3xl">
+                  👤
+                </div>
+              )}
+
+              <div className="min-w-0">
+                <p className="truncate text-xl font-black">{profileName || "User JakSky"}</p>
+                <p className="mt-1 truncate text-sm font-bold text-white/45">
+                  {profileTitle || "Member JakSky"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              <div>
+                <span className="text-sm font-bold text-white/50">Avatar</span>
+
+                <div className="mt-2 rounded-3xl border border-pink-400/25 bg-white/10 p-3">
+                  <div className="flex items-center gap-3">
+                    {profileAvatar ? (
+                      <img
+                        src={profileAvatar}
+                        alt=""
+                        className="h-16 w-16 rounded-2xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-2xl">
+                        👤
+                      </div>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <label className="block cursor-pointer rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-4 py-3 text-center text-sm font-black text-white active:scale-[0.98]">
+                        Pilih dari Galeri
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={chooseAvatarFromGallery}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {profileAvatar && (
+                        <button
+                          type="button"
+                          onClick={() => setProfileAvatar("")}
+                          className="mt-2 w-full rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white/65"
+                        >
+                          Hapus Avatar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <label className="block">
+                <span className="text-sm font-bold text-white/50">Nama</span>
+                <input
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-pink-400/25 bg-white/10 px-4 py-4 font-bold text-white outline-none"
+                  placeholder="Nama profil"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-bold text-white/50">Title</span>
+                <input
+                  value={profileTitle}
+                  onChange={(e) => setProfileTitle(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-pink-400/25 bg-white/10 px-4 py-4 font-bold text-white outline-none"
+                  placeholder="Contoh: Member JakSky"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-bold text-white/50">Bio</span>
+                <textarea
+                  value={profileBio}
+                  onChange={(e) => setProfileBio(e.target.value)}
+                  className="mt-2 min-h-28 w-full rounded-2xl border border-pink-400/25 bg-white/10 px-4 py-4 font-bold text-white outline-none"
+                  placeholder="Tulis bio singkat..."
+                />
+              </label>
+            </div>
+
+            <button
+              onClick={saveMyProfile}
+              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-700 px-5 py-4 font-black"
+            >
+              Simpan Profil
+            </button>
           </section>
         </div>
       )}
