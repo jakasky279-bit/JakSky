@@ -214,6 +214,93 @@ function findProfileFromComment(comment: CommentItem): ProfilePreview {
   };
 }
 
+function profileKey(profile?: Partial<ProfilePreview | Account | CommentItem> | null) {
+  const email = String(profile?.email || "").trim().toLowerCase();
+  const username = String((profile as any)?.username || (profile as any)?.user || "").trim().toLowerCase();
+
+  return email || username || "guest";
+}
+
+function sameProfile(a?: Partial<ProfilePreview>, b?: Partial<ProfilePreview | CommentItem | Account>) {
+  const keyA = profileKey(a);
+  const keyB = profileKey(b as any);
+
+  if (keyA && keyB && keyA === keyB) return true;
+
+  const nameA = String(a?.username || "").toLowerCase();
+  const nameB = String((b as any)?.username || (b as any)?.user || "").toLowerCase();
+
+  return Boolean(nameA && nameB && nameA === nameB);
+}
+
+function recordWatchHistory(item: ContentItem, user?: Account | null) {
+  const username = user?.username || user?.email || "Guest";
+  const key = profileKey({
+    username,
+    email: user?.email || "",
+    role: user?.role || "user",
+  });
+
+  const store = getJSON<Record<string, any[]>>("jasky_watch_history", {});
+  const oldList = Array.isArray(store[key]) ? store[key] : [];
+
+  const entry = {
+    id: `${item.id}-${Date.now()}`,
+    contentId: item.id,
+    title: item.title || "Tanpa judul",
+    thumbnail: getThumbnail(item),
+    watchedAt: new Date().toISOString(),
+    videoCount: getVideos(item).length || 1,
+  };
+
+  store[key] = [
+    entry,
+    ...oldList.filter((history) => history.contentId !== item.id),
+  ].slice(0, 30);
+
+  localStorage.setItem("jasky_watch_history", JSON.stringify(store));
+}
+
+function getProfileCommentHistory(profile: ProfilePreview, contents: ContentItem[]) {
+  const list: Array<{
+    id: string;
+    contentTitle: string;
+    text: string;
+    createdAt: string;
+  }> = [];
+
+  for (const content of contents) {
+    const comments = Array.isArray(content.comments) ? content.comments : [];
+
+    for (const comment of comments) {
+      if (comment.hidden) continue;
+
+      const commentProfile = findProfileFromComment(comment);
+
+      if (sameProfile(profile, commentProfile)) {
+        list.push({
+          id: comment.id,
+          contentTitle: content.title || "Tanpa judul",
+          text: comment.text,
+          createdAt: comment.createdAt,
+        });
+      }
+    }
+  }
+
+  return list
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+    .slice(0, 10);
+}
+
+function getProfileWatchHistory(profile: ProfilePreview) {
+  const store = getJSON<Record<string, any[]>>("jasky_watch_history", {});
+  const list = store[profileKey(profile)] || [];
+
+  return Array.isArray(list) ? list.slice(0, 10) : [];
+}
+
+
 export default function UserPage() {
   const [contents, setLocalContents] = useState<ContentItem[]>([]);
   const [selected, setSelected] = useState<ContentItem | null>(null);
@@ -291,6 +378,7 @@ export default function UserPage() {
 
   function openContent(item: ContentItem) {
     const videos = getVideos(item);
+    recordWatchHistory(item, currentUser);
     setSelected(item);
     setActiveVideoIndex(0);
     setCommentText("");
@@ -388,6 +476,8 @@ export default function UserPage() {
   const selectedVideos = selected ? getVideos(selected) : [];
   const activeVideo = selectedVideos[activeVideoIndex] || selectedVideos[0];
   const visibleComments = (selected?.comments || []).filter((comment) => !comment.hidden);
+  const profileComments = profilePreview ? getProfileCommentHistory(profilePreview, contents) : [];
+  const profileWatchHistory = profilePreview ? getProfileWatchHistory(profilePreview) : [];
 
   return (
     <main className="min-h-screen px-4 py-8 text-white">
@@ -642,42 +732,48 @@ export default function UserPage() {
                   {visibleComments.length === 0 ? (
                     <p className="rounded-2xl bg-white/5 p-4 text-white/45">Belum ada komentar.</p>
                   ) : (
-                    visibleComments.map((comment) => {
-                      const profile = findProfileFromComment(comment);
-
-                      return (
+                    visibleComments.map((comment) => (
                       <article
                         key={comment.id}
-                        onClick={() => setProfilePreview(profile)}
+                        onClick={() => setProfilePreview(findProfileFromComment(comment))}
                         className="cursor-pointer rounded-3xl border border-white/10 bg-white/10 p-4 transition active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3">
-                          {profile.avatar ? (
-                            <img src={profile.avatar} alt="" className="h-12 w-12 rounded-2xl object-cover" />
+                          {findProfileFromComment(comment).avatar ? (
+                            <img
+                              src={findProfileFromComment(comment).avatar || ""}
+                              alt=""
+                              className="h-12 w-12 rounded-2xl object-cover"
+                            />
                           ) : (
                             <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-pink-400 to-blue-500" />
                           )}
-                          <div>
-                            <p className="font-black">{profile.username}</p>
-                            <div className="flex flex-wrap gap-2">
-                              {profile.title && (
-                                <span className="rounded-full bg-pink-500/20 px-3 py-1 text-xs font-black text-pink-100">
-                                  {profile.title}
-                                </span>
-                              )}
-                              {profile.isVip && (
-                                <span className="rounded-full bg-pink-500/20 px-3 py-1 text-xs font-black text-pink-100">
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
+                              <p className="truncate font-black">{findProfileFromComment(comment).username}</p>
+
+                              <span className="shrink-0 rounded-full bg-pink-500/20 px-3 py-1 text-[11px] font-black text-pink-100">
+                                {findProfileFromComment(comment).title || "Member JakSky"}
+                              </span>
+
+                              {findProfileFromComment(comment).isVip && (
+                                <span className="shrink-0 rounded-full bg-yellow-400/20 px-3 py-1 text-[11px] font-black text-yellow-100">
                                   VIP
                                 </span>
                               )}
                             </div>
+
+                            <p className="mt-1 text-xs font-bold text-white/35">
+                              Klik untuk lihat profil
+                            </p>
                           </div>
                         </div>
 
                         <p className="mt-4 text-white/80">{comment.text}</p>
                         <p className="mt-3 text-xs text-white/35">{formatDate(comment.createdAt)}</p>
                       </article>
-                      );
+                    ))
                   )}
                 </div>
               </section>
@@ -742,6 +838,61 @@ export default function UserPage() {
                 <p className="mt-2 break-all text-white/80">{profilePreview.email}</p>
               </div>
             )}
+
+            <div className="mt-3 rounded-3xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-black text-white/70">📺 History Tontonan</p>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/45">
+                  {profileWatchHistory.length}
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {profileWatchHistory.length === 0 ? (
+                  <p className="text-sm text-white/40">
+                    Belum ada history tontonan di perangkat ini.
+                  </p>
+                ) : (
+                  profileWatchHistory.map((history) => (
+                    <div key={history.id} className="rounded-2xl bg-black/30 p-3">
+                      <p className="line-clamp-1 text-sm font-black text-white/80">
+                        {history.title}
+                      </p>
+                      <p className="mt-1 text-xs text-white/35">
+                        {history.videoCount || 1} video • {formatDate(history.watchedAt)}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-3xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-black text-white/70">💬 Riwayat Komentar</p>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/45">
+                  {profileComments.length}
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {profileComments.length === 0 ? (
+                  <p className="text-sm text-white/40">
+                    Belum ada komentar dari profil ini.
+                  </p>
+                ) : (
+                  profileComments.map((item) => (
+                    <div key={item.id} className="rounded-2xl bg-black/30 p-3">
+                      <p className="line-clamp-1 text-xs font-black text-pink-100">
+                        {item.contentTitle}
+                      </p>
+                      <p className="mt-1 text-sm text-white/80">{item.text}</p>
+                      <p className="mt-2 text-xs text-white/35">{formatDate(item.createdAt)}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
 
             <button
               onClick={() => setProfilePreview(null)}
