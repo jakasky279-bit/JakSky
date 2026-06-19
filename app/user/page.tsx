@@ -951,15 +951,15 @@ export default function UserPage() {
               </button>
             </div>
 
-            <div className="mt-5 flex items-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-4">
+            <div className="mt-5 flex items-center gap-4 rounded-3xl border border-pink-300/25 bg-gradient-to-br from-white/10 via-pink-500/10 to-sky-500/10 p-4 shadow-[0_18px_55px_rgba(236,72,153,0.18)]">
               {profileAvatar ? (
                 <img
                   src={profileAvatar}
                   alt=""
-                  className="h-20 w-20 rounded-[28px] object-cover"
+                  className="h-20 w-20 rounded-[28px] border-2 border-pink-300/50 bg-gradient-to-br from-pink-500/25 via-purple-500/25 to-sky-400/25 object-cover p-1 shadow-[0_0_35px_rgba(236,72,153,0.35)]"
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-3xl">
+                <div className="flex h-20 w-20 items-center justify-center rounded-[28px] border-2 border-pink-300/50 bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-3xl shadow-[0_0_35px_rgba(236,72,153,0.35)]">
                   👤
                 </div>
               )}
@@ -976,16 +976,16 @@ export default function UserPage() {
               <div>
                 <span className="text-sm font-bold text-white/50">Avatar</span>
 
-                <div className="mt-2 rounded-3xl border border-pink-400/25 bg-white/10 p-3">
+                <div className="mt-2 rounded-3xl border border-pink-300/30 bg-gradient-to-br from-white/10 via-pink-500/10 to-sky-500/10 p-3 shadow-[0_18px_55px_rgba(236,72,153,0.18)]">
                   <div className="flex items-center gap-3">
                     {profileAvatar ? (
                       <img
                         src={profileAvatar}
                         alt=""
-                        className="h-16 w-16 rounded-2xl object-cover"
+                        className="h-16 w-16 rounded-2xl border-2 border-pink-300/50 bg-gradient-to-br from-pink-500/25 via-purple-500/25 to-sky-400/25 object-cover p-1 shadow-[0_0_28px_rgba(236,72,153,0.35)]"
                       />
                     ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-2xl">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-pink-300/50 bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 text-2xl shadow-[0_0_28px_rgba(236,72,153,0.35)]">
                         👤
                       </div>
                     )}
@@ -1065,7 +1065,7 @@ export default function UserPage() {
                   <img
                     src={profilePreview.avatar}
                     alt=""
-                    className="h-20 w-20 rounded-[28px] object-cover"
+                    className="h-20 w-20 rounded-[28px] border-2 border-pink-300/50 bg-gradient-to-br from-pink-500/25 via-purple-500/25 to-sky-400/25 object-cover p-1 shadow-[0_0_35px_rgba(236,72,153,0.35)]"
                   />
                 ) : (
                   <div className="h-20 w-20 rounded-[28px] bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 shadow-lg shadow-pink-500/20" />
